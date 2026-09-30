@@ -1,0 +1,130 @@
+/* =========================================================
+   SNAP assistant ("Can I buy it with SNAP?")
+   Uses the shared tokens in styles.css; adds the receipt look.
+   ========================================================= */
+.snap{
+  --yes:#1F6B3F; --yes-bg:#E1F1E6;
+  --no:#A8322E; --no-bg:#F8E4E2;
+  --maybe:#8A5A00; --maybe-bg:#FBF0D6;
+  --receipt:'Courier Prime','Courier New',monospace;
+  max-width:760px;padding-top:40px;padding-bottom:0;
+}
+.snap-intro h1{font-size:clamp(28px,4.4vw,44px);line-height:1.1;margin:0 0 12px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.snap-intro p{margin:0 0 8px;color:var(--muted);max-width:60ch}
+.examples{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+.examples button{
+  font:inherit;font-size:15px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  padding:8px 14px;border-radius:999px;cursor:pointer;min-height:40px
+}
+.examples button:hover{border-color:var(--blue);background:var(--tint)}
+
+#thread{margin-top:28px;display:flex;flex-direction:column;gap:20px}
+.you{
+  align-self:flex-end;max-width:85%;background:var(--navy);color:#fff;
+  padding:11px 16px;border-radius:18px 18px 5px 18px;white-space:pre-wrap;word-wrap:break-word
+}
+.status{color:var(--muted);font-style:italic}
+.snap .error{margin:0;background:var(--no-bg);color:var(--no);padding:13px 16px;border-radius:var(--radius);font-size:15px}
+
+/* The receipt: the one bold element */
+.receipt{
+  align-self:flex-start;width:100%;max-width:30rem;background:var(--card);color:var(--ink);
+  font-family:var(--receipt);font-size:16px;
+  padding:22px 22px 30px;position:relative;
+  box-shadow:0 1px 0 var(--line),0 10px 24px -18px rgba(0,0,0,.45);
+  --tooth:10px;
+  -webkit-mask:conic-gradient(from 135deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/var(--tooth) calc(var(--tooth)/2) repeat-x,
+               linear-gradient(#000 0 0) top/100% calc(100% - var(--tooth)/2 + 1px) no-repeat;
+          mask:conic-gradient(from 135deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/var(--tooth) calc(var(--tooth)/2) repeat-x,
+               linear-gradient(#000 0 0) top/100% calc(100% - var(--tooth)/2 + 1px) no-repeat;
+}
+.receipt .head{text-align:center;border-bottom:2px dashed var(--line);padding-bottom:13px;margin-bottom:13px}
+.receipt .head strong{display:block;font-size:18px}
+.receipt .head span{color:var(--muted);font-size:14px}
+.sec{margin:16px 0 0}
+.sec h2{font-size:16px;margin:0 0 6px;display:flex;justify-content:space-between;gap:16px}
+.sec.yes h2{color:var(--yes)}
+.sec.no h2{color:var(--no)}
+.sec.maybe h2{color:var(--maybe)}
+.sec ul{list-style:none;margin:0;padding:0}
+.sec li{padding:7px 0;border-bottom:1px dotted var(--line)}
+.sec li:last-child{border-bottom:0}
+.sec li b{font-weight:700}
+.sec li small{display:block;color:var(--muted);font-size:14px;line-height:1.4;margin-top:2px;font-family:var(--font)}
+.mark{display:inline-block;width:1.4em;font-weight:700}
+.sec.yes .mark{color:var(--yes)}
+.sec.no .mark{color:var(--no)}
+.sec.maybe .mark{color:var(--maybe)}
+.foot{border-top:2px dashed var(--line);margin-top:16px;padding-top:13px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.foot button{
+  font:inherit;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;
+  background:var(--yes-bg);color:var(--yes);border:1px solid var(--yes);padding:7px 13px;border-radius:6px
+}
+.foot .copied{color:var(--muted);font-size:14px;font-family:var(--font)}
+.row{display:flex;align-items:flex-start;gap:8px}
+.row .name{flex:1;min-width:0}
+.ctrls{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:6px;font-family:var(--font)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
+.stepper button{
+  font:inherit;font-weight:700;font-size:18px;line-height:1;width:36px;height:36px;
+  border:0;background:transparent;color:var(--blue);cursor:pointer
+}
+.stepper button:hover:not(:disabled){background:var(--tint)}
+.stepper button:disabled{color:var(--muted);opacity:.45;cursor:default}
+.stepper output{min-width:32px;text-align:center;font-weight:700;font-size:16px}
+.size{
+  font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;height:36px;padding:0 8px;max-width:100%
+}
+.total{font-family:var(--font);font-size:15px;color:var(--muted);margin-top:10px}
+.dish .head strong{font-size:19px}
+.dish .why{font-family:var(--font);margin:0 0 13px;line-height:1.5}
+.dish ul{list-style:none;margin:0;padding:0}
+.dish li{border-bottom:1px dotted var(--line)}
+.dish li:last-child{border-bottom:0}
+.dish label{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer}
+.dish input[type=checkbox]{width:18px;height:18px;margin-top:3px;accent-color:var(--yes);flex:none}
+.dish label small{display:block;color:var(--muted);font-size:14px;font-family:var(--font)}
+.dish .ask{font-family:var(--font);font-weight:700;margin:16px 0 10px}
+.dish .actions{display:flex;flex-wrap:wrap;gap:10px}
+.dish .actions button{
+  font:inherit;font-family:var(--font);font-size:16px;cursor:pointer;
+  padding:9px 16px;border-radius:6px;border:2px solid var(--navy);min-height:44px
+}
+.dish .actions .primary{background:var(--navy);color:#fff;font-weight:700}
+.dish .actions .secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+.dish .actions button:disabled{opacity:.5;cursor:default}
+.dish .done{font-family:var(--font);color:var(--muted);margin:13px 0 0}
+.receipt .opt{font-weight:400;color:var(--muted)}
+.src{font-family:var(--font);font-size:13px;color:var(--muted);margin-top:14px}
+.snap .notice{margin-top:24px;font-size:14.5px}
+
+/* Message box: sticks to the bottom of the screen while you scroll the chat */
+.composer{
+  position:sticky;bottom:0;z-index:5;margin-top:24px;background:var(--bg);
+  border-top:1px solid var(--line);padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px))
+}
+.composer form{display:flex;gap:10px;align-items:flex-end}
+.composer textarea{
+  flex:1;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line-strong);
+  border-radius:var(--radius);padding:11px 14px;resize:none;min-height:50px;max-height:144px
+}
+.composer textarea:focus{border-color:var(--blue);outline:3px solid var(--focus);outline-offset:1px}
+.composer .btn{min-height:50px}
+
+/* Landing page: the question in the hero */
+.ask-form{display:flex;gap:10px;flex-wrap:wrap;max-width:560px}
+.ask-form .input{flex:1 1 260px}
+.ask-form .btn{flex:none}
+.ask-hint{margin:10px 0 0;font-size:14.5px;color:var(--muted)}
+.ask-hint a{font-weight:700}
+
+@media (max-width:560px){
+  .snap{padding-top:24px}
+  .receipt{padding:18px 16px 26px}
+  .ask-form .btn{width:100%}
+}
+@media (prefers-reduced-motion:no-preference){
+  .receipt{animation:print .45s ease-out;transform-origin:top}
+  @keyframes print{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+}

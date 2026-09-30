@@ -1,27 +1,69 @@
 # CT Food Access Finder
 
-Plain HTML, CSS, and JavaScript. No build step.
+One website that helps people in Connecticut get food:
+
+- **Landing page** asks "Hungry? What do you want to eat or buy today?" and sends the answer to the SNAP assistant.
+- **SNAP assistant** (`pages/assistant.html`) uses Claude to say what Connecticut SNAP covers, with quantity and size controls. Name a meal, like "I want to make a burger," and it lists the groceries.
+- **Nearby stores** (`pages/map.html`) finds SNAP/EBT stores near you by car, bus, or on foot.
+- **Sign up / Sign in** (top right) with a phone number and a one-time code (demo).
+
+Plain HTML, CSS, and JavaScript, plus a small Node.js server (`server.js`) that talks to Claude. No build step, no npm install.
+
+## What you need (one time)
+
+1. **Node.js 18 or newer.** Download the "LTS" version from https://nodejs.org and install it.
+2. **A Claude API key.** At https://console.anthropic.com add some credit under **Billing**, then go to **API Keys**, click **Create Key**, and copy it. It starts with `sk-ant-`.
 
 ## Run it
-Open `index.html` in a browser, or run `python3 -m http.server 8000` in this folder and visit http://localhost:8000
+
+- **Windows:** double-click `start-windows.bat`
+- **Mac:** double-click `start-mac.command` (the first time, right-click it and choose **Open**)
+- **Any computer, from a terminal:** run `node server.js` in this folder
+
+The first time, the launcher creates **config.txt** from `config.example.txt` and opens it (from a terminal, copy `config.example.txt` to `config.txt` yourself). Paste your key after `ANTHROPIC_API_KEY=` (no spaces, no quotes), save, and run it again.
+Then open **http://localhost:3000**. Keep the Terminal window open while you use the site, and press **Ctrl+C** in it to stop the server.
+
+If the page says a port is already in use (`EADDRINUSE`), an older copy is still running. Close its window, or on a Mac run `lsof -ti :3000 | xargs kill`.
+
+You'll know the AI is working when the assistant's receipts **don't** show "Quick check by keyword matching."
+Opening `index.html` directly (without the server) still works for browsing, but the assistant falls back to that keyword check.
+
+## Keep your Claude key safe (and working)
+
+If your key ever appears in a public GitHub repo, GitHub's secret scanning finds it and Anthropic disables it automatically, usually within minutes.
+
+- Your key goes **only** in `config.txt`. The repo has `config.example.txt` instead, a blank template.
+- `config.txt` is listed in `.gitignore`, so `git push` and GitHub Desktop skip it.
+- **GitHub's "Add files via upload" page ignores `.gitignore`.** Never drag `config.txt` (or the whole folder) onto it.
+- The key stays on the server. The server only sends the site's own files (`index.html`, `css/`, `js/`, `pages/`, `assets/`) to browsers, never `config.txt`.
+- `MAX_CHECKS_PER_MINUTE` in `config.txt` limits how many checks each visitor can run, to protect your bill.
 
 ## Structure
-    ct-food-access/
-    ├── index.html            Landing page (hero banner, options, how it works)
-    ├── css/styles.css        Design tokens, layout, forms, responsive rules
-    ├── js/
-    │   ├── main.js           Mobile menu, toast, signed-in header
-    │   └── auth.js           Sign up + sign in with phone OTP (DEMO)
-    ├── assets/
-    │   ├── hero.jpg          ADD THIS: a real photo of people (landscape, ~1200x900)
-    │   ├── logo.svg
-    │   └── favicon.svg
-    └── pages/
-        ├── signup.html       Details, uploads, OTP verification
-        ├── login.html        Phone + OTP
-        ├── assistant.html    (placeholder) chatbot
-        ├── map.html          Live SNAP/EBT retailer finder + Google map
-        └── order.html        (placeholder) pickup/delivery, bill, checkout
+    index.html            Landing page: the "Hungry?" question, options, how it works
+    server.js             Serves the site and talks to Claude (/api/check)
+    config.example.txt    Blank settings template (safe to share); your real one is config.txt
+    css/styles.css        Design tokens, layout, forms, responsive rules
+    css/assistant.css     SNAP assistant chat and receipts
+    css/map.css           Map page
+    js/main.js            Mobile menu, toast, signed-in header
+    js/auth.js            Sign up + sign in with phone OTP (DEMO)
+    js/assistant.js       SNAP assistant (with offline keyword fallback)
+    js/map.js, config.js  Nearby stores map and its settings
+    assets/               logo.svg, favicon.svg, hero.jpg (ADD THESE)
+    pages/
+      assistant.html      SNAP assistant
+      map.html            Live SNAP/EBT retailer finder + Google map
+      signup.html         Details, uploads, OTP verification
+      login.html          Phone + OTP
+      order.html          (placeholder) pickup/delivery, bill, checkout
+
+## Updating the SNAP rules
+The rules the AI follows are in `server.js`, in the `RULES` text near the top.
+If Connecticut changes its SNAP rules (for example, bans soda or candy), edit that text and restart.
+
+## Putting it online later
+Upload the folder to a host that runs Node.js (for example Render, Railway, or a small VPS) and set
+`ANTHROPIC_API_KEY` in the host's environment settings instead of using `config.txt`.
 
 ## Banner photo
 Save a real photo of people (landscape, about 1200x900, under 400 KB) as `assets/hero.jpg`. It is used on the landing page and the sign up / sign in pages. It fills the hero panel behind the sample results card. Until it exists, the panel shows a soft blue, green and gold background, so the page still looks finished. Use photos you have the right to use: your own, ones with permission, or free-license sites such as unsplash.com and pexels.com (search: "community food market", "senior grocery shopping", "food pantry volunteers").

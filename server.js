@@ -107,18 +107,40 @@ async function askClaude(userText) {
   return data;
 }
 
-const INDEX = path.join(__dirname, "public", "index.html");
+// ---- The website ----
+// Only the site's own files are served: index.html plus the css, js, pages and assets folders.
+// Everything else (config.txt with your key, server.js, .env) is never sent to the browser.
+const SITE_DIRS = ["css", "js", "pages", "assets"];
+const TYPES = {
+  ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",
+  ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+  ".webp": "image/webp", ".gif": "image/gif", ".ico": "image/x-icon"
+};
+
+function siteFile(pathname) {
+  let p;
+  try { p = decodeURIComponent(pathname); } catch { return null; }
+  if (/[\\\0]/.test(p)) return null; // no backslashes (Windows paths) or null bytes
+  if (p.endsWith("/")) p += "index.html";
+  const rel = path.posix.normalize(p).replace(/^\/+/, "");
+  if (rel.split("/").some(part => part === ".." || part.startsWith("."))) return null;
+  const inSite = rel === "index.html" || (rel.includes("/") && SITE_DIRS.includes(rel.split("/")[0]));
+  if (!inSite || !TYPES[path.extname(rel).toLowerCase()]) return null;
+  return path.join(__dirname, rel);
+}
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost");
 
-  if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
-    fs.readFile(INDEX, (err, buf) => {
-      if (err) { res.writeHead(500); return res.end("index.html not found"); }
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-      res.end(buf);
-    });
-    return;
+  if (req.method === "GET" || req.method === "HEAD") {
+    const file = siteFile(url.pathname);
+    if (file) {
+      return fs.readFile(file, (err, buf) => {
+        if (err) { res.writeHead(404, { "Content-Type": "text/plain" }); return res.end("Not found"); }
+        res.writeHead(200, { "Content-Type": TYPES[path.extname(file).toLowerCase()], "Cache-Control": "no-cache" });
+        res.end(req.method === "HEAD" ? undefined : buf);
+      });
+    }
   }
 
   if (req.method === "GET" && url.pathname === "/api/health") {

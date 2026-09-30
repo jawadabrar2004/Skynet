@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/assistant.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -42,12 +43,14 @@
   <div class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <h1>Find food you can actually get to.</h1>
-        <p class="lead">Tell us where you are and how you get around. We show pantries, mobile markets, and SNAP/EBT grocers that are open and reachable for you, whether you drive, ride the bus, or walk.</p>
-        <div class="hero-actions">
-          <a class="btn btn-gold" href="#start">Get started</a>
-          <a class="btn btn-outline" href="pages/login.html">Sign in</a>
-        </div>
+        <h1><label for="ask">Hungry? What do you want to eat or buy today?</label></h1>
+        <p class="lead">Type a grocery list or a meal. We’ll tell you what your Connecticut SNAP benefits cover, and help you find stores you can actually get to.</p>
+        <form class="ask-form" action="pages/assistant.html" method="get">
+          <input class="input" id="ask" name="q" type="text" maxlength="4000" autocomplete="off" required
+                 placeholder="For example: milk, eggs, and tacos for dinner">
+          <button class="btn btn-gold" type="submit">Ask</button>
+        </form>
+        <p class="ask-hint">No account needed. Or <a href="pages/map.html">find SNAP/EBT stores near you</a>.</p>
         <ul class="facts">
           <li><i class="dot"></i>Ranked by real travel time</li>
           <li><i class="dot"></i>Matches store hours to your schedule</li>
@@ -72,12 +75,12 @@
     <h2 class="visually-hidden">Choose how to get started</h2>
     <div class="grid-2">
       <article class="choice primary">
-        <h3>Get help from the assistant</h3>
-        <p class="for">Best if you would rather type or talk than fill in forms.</p>
+        <h3>Ask the SNAP assistant</h3>
+        <p class="for">Best if you would rather type than fill in forms.</p>
         <ul>
-          <li>Say it in your own words, such as "I don't have a car and I'm near Main Street."</li>
-          <li>Get plain-language directions.</li>
-          <li>No account needed to look around.</li>
+          <li>Say it in your own words, such as "I want to make a burger" or "milk, diapers, and soda."</li>
+          <li>See what SNAP covers, with quantities and sizes.</li>
+          <li>No account needed.</li>
         </ul>
         <a class="btn btn-gold" href="pages/assistant.html">Chat with the assistant</a>
       </article>

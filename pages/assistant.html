@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Assistant chat - CT Food Access Finder</title>
+  <title>SNAP assistant - CT Food Access Finder</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/assistant.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -39,7 +40,35 @@
     </div>
   </div>
 </header>
-<main id="main" class="wrap stub"><h1>Assistant chat</h1><p>Coming next: a chat where you describe your location and how you travel.</p><p><a class="btn btn-navy" href="../index.html">Back to home</a></p></main>
+<main id="main" class="wrap snap">
+  <div class="snap-intro">
+    <h1>Hungry? What do you want to eat or buy today?</h1>
+    <p>Tell me what you want to buy, and I’ll sort it into what your Connecticut SNAP benefits cover and what they don’t.</p>
+    <p>Type it however you like, for example “milk, 2 bags of chips, dog food, and a hot pizza from the deli.” You can also name a meal, like “I want to make a burger,” and I’ll list the groceries to make it.</p>
+    <div class="examples" aria-label="Try an example">
+      <button type="button" data-ex="eggs, bread, bananas, soda, diapers, dish soap">Weekly groceries</button>
+      <button type="button" data-ex="birthday cake, candles, balloons, ice cream, juice boxes, paper plates">Birthday party</button>
+      <button type="button" data-ex="rotisserie chicken, cold sub sandwich, energy drink, vitamins, beer">Quick lunch run</button>
+      <button type="button" data-ex="tomato seeds, cat food, live lobster, baby formula, toothpaste">Mixed list</button>
+      <button type="button" data-ex="I want to make a burger">Make a burger</button>
+      <button type="button" data-ex="tacos for dinner and a gallon of milk">Tacos + milk</button>
+    </div>
+  </div>
+
+  <div id="thread" aria-live="polite"></div>
+
+  <div class="composer">
+    <form id="form">
+      <label class="visually-hidden" for="box">What do you want to eat or buy today?</label>
+      <textarea id="box" rows="1" placeholder="Type what you want…"></textarea>
+      <button class="btn btn-navy" id="send" type="submit">Check</button>
+    </form>
+  </div>
+
+  <div class="notice">
+    <p>Based on federal USDA SNAP rules as of September 2026. Connecticut has no extra soda or candy ban. Rules can change, so check <a href="https://portal.ct.gov/dss" target="_blank" rel="noopener">CT DSS</a> for official updates. Want to know where to shop? <a href="map.html">Find SNAP/EBT stores near you</a>.</p>
+  </div>
+</main>
 <footer class="site-footer">
   <div class="wrap footer-grid">
     <div><h4>Food Access Finder</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
@@ -49,4 +78,6 @@
   </div>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="../js/main.js"></script></body></html>
+<script src="../js/main.js"></script>
+<script src="../js/assistant.js"></script>
+</body></html>
