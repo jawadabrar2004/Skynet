@@ -9,11 +9,9 @@ if errorlevel 1 (
 if not exist config.txt copy config.example.txt config.txt >nul
 findstr /R /C:"^ANTHROPIC_API_KEY=sk-" config.txt >nul 2>nul
 if errorlevel 1 (
-  echo Your API key is not in config.txt yet.
-  echo Notepad will open. Paste your key after ANTHROPIC_API_KEY= , save, close Notepad, then run this again.
-  notepad config.txt
-  pause
-  exit /b
+  echo Note: no Claude API key in config.txt, so the SNAP assistant uses a basic keyword check.
+  echo The rest of the site works. To turn the AI on, add your key to config.txt and run this again.
+  echo.
 )
 start "" http://localhost:3000
 node server.js
