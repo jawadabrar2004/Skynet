@@ -158,5 +158,4 @@ server.listen(PORT, () => {
     console.log("  Keep this window open while you use the site. Press Ctrl+C to stop.\n");
   }
 });
-Highlight
 // End of server.js
