@@ -287,8 +287,11 @@
 
     // Continue as guest: browse stores and shop without an account.
     var guest = $('#guest-btn');
-    if (guest) {
-      if (NEXT) guest.href = NEXT;
+    if (guest && NEXT) {
+      // Came from confirming an order: an account is required, so no guest option here.
+      guest.hidden = true;
+      var or = $('.or-divider'); if (or) or.hidden = true;
+    } else if (guest) {
       guest.addEventListener('click', function () {
         try { localStorage.setItem('ctfa_guest', '1'); } catch (e) {}
       });

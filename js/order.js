@@ -125,7 +125,7 @@
   document.addEventListener('ctfa-cart', function () { renderFab(); renderShelf(); });
   window.addEventListener('storage', function (e) { if (e.key === CART) { renderFab(); renderShelf(); } });
 
-  // ---- Order popup: items, store, pickup time -> sign in or guest -> confirmed ----
+  // ---- Order popup: items, store, pickup time -> sign in -> confirmed ----
   var dialog = el('dialog', 'order-dialog');
   dialog.setAttribute('aria-labelledby', 'order-title');
   document.body.appendChild(dialog);
@@ -229,20 +229,18 @@
       .then(function (r) { return r.ok; }, function () { return false; });
   }
 
-  // Signed out: "Do you want to sign in, or continue as a guest?"
-  function askAccount(when) {
-    var panel = frame('Sign in or continue as a guest?', true);
-    panel.appendChild(el('p', 'od-lede', 'Sign in to save this order to your account, or place it now as a guest.'));
+  // Signed out: orders need an account, so ask them to sign in first.
+  function askAccount() {
+    var panel = frame('Sign in to confirm your order', true);
+    panel.appendChild(el('p', 'od-lede', 'Your cart is saved. Sign in with your phone number, then confirm your order. New here? You can create an account on the next page.'));
     var actions = el('div', 'od-actions od-stack');
     var signIn = el('a', 'btn btn-navy', 'Sign in');
     // After signing in, come back here and reopen this popup.
     var here = location.pathname.split('/').pop() || 'assistant.html';
     signIn.href = 'login.html?next=' + encodeURIComponent(here + '?checkout=1');
-    var guest = el('button', 'btn btn-outline', 'Continue as guest'); guest.type = 'button';
-    guest.onclick = function () { try { localStorage.setItem('ctfa_guest', '1'); } catch (e) {} placeOrder(when); };
     var back = el('button', 'link-btn', '← Back to order summary'); back.type = 'button';
     back.onclick = openCheckout;
-    actions.appendChild(signIn); actions.appendChild(guest);
+    actions.appendChild(signIn);
     panel.appendChild(actions);
     panel.appendChild(back);
   }
