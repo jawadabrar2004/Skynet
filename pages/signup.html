@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sign up - CT Food Access Finder</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="utility"><div class="wrap">
+  <span class="u-left"><b>Prototype.</b> Student project, not an official State of Connecticut website.</span>
+  <span class="u-right"><a href="tel:211">Need food now? Call 211</a><button type="button" data-toast="Language options will be added in a later version.">Espa&ntilde;ol</button></span>
+</div></div>
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="../index.html" aria-label="Food Access Finder home">
+      <img src="../assets/logo.svg" alt="" width="40" height="46">
+      <span class="brand-text"><small>Connecticut Food Access</small><strong>Food Access Finder</strong></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="header-menu">Menu</button>
+    <div class="header-menu" id="header-menu">
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="../index.html#how">How it works</a></li>
+          <li><a href="../index.html#travel">Ways to travel</a></li>
+          <li><a href="../index.html#help">Help</a></li>
+        </ul>
+      </nav>
+      <div class="auth-links" id="auth-links">
+        <a class="btn btn-outline btn-sm" href="../pages/login.html">Sign in</a>
+        <a class="btn btn-gold btn-sm" href="../pages/signup.html">Sign up</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main" class="auth">
+  <aside class="auth-aside">
+    <div>
+      <h1>Create your account</h1>
+      <p>One account for the map, your orders, and pickup or delivery.</p>
+      <ul class="checks">
+        <li>Stores ranked by how you travel</li>
+        <li>Pickup times that fit your schedule</li>
+        <li>Delivery for seniors and people with disabilities</li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="auth-main">
+    <div class="auth-card">
+      <ol class="stepbar" aria-label="Sign up progress">
+        <li id="sb1" class="current" aria-current="step">Your details</li>
+        <li id="sb2">Verify your phone</li>
+      </ol>
+
+      <div class="alert"><strong>Demo mode</strong>No text message is sent and nothing you enter is saved or verified. The code appears on screen so you can test the flow.</div>
+
+      <form id="signup-form" novalidate>
+        <h2>Your details</h2>
+        <p class="lede">Fields without "optional" are required.</p>
+
+        <fieldset class="form-section">
+          <legend>About you</legend>
+          <div class="row-2">
+            <div class="field">
+              <label for="firstName">First name</label>
+              <input class="input" id="firstName" name="firstName" type="text" autocomplete="given-name" aria-describedby="firstName-error">
+              <p class="error" id="firstName-error" role="alert"></p>
+            </div>
+            <div class="field">
+              <label for="lastName">Last name</label>
+              <input class="input" id="lastName" name="lastName" type="text" autocomplete="family-name" aria-describedby="lastName-error">
+              <p class="error" id="lastName-error" role="alert"></p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(860) 555-0123" aria-describedby="phone-hint phone-error">
+            <p class="hint" id="phone-hint">We text a code to this number. You will use it to sign in.</p>
+            <p class="error" id="phone-error" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="email">Email <span class="opt">(optional)</span></label>
+            <input class="input" id="email" name="email" type="email" autocomplete="email" aria-describedby="email-error">
+            <p class="error" id="email-error" role="alert"></p>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="age">Age</label>
+              <input class="input" id="age" name="age" type="number" inputmode="numeric" min="18" max="120" aria-describedby="age-error">
+              <p class="error" id="age-error" role="alert"></p>
+            </div>
+            <div class="field">
+              <label for="transport">How do you usually get around?</label>
+              <select class="input" id="transport" name="transport" aria-describedby="transport-error">
+                <option value="">Choose one</option>
+                <option value="car">I have a car</option>
+                <option value="bus">I take the bus</option>
+                <option value="walk">I walk</option>
+              </select>
+              <p class="error" id="transport-error" role="alert"></p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend>Benefits and eligibility</legend>
+          <div class="field">
+            <label for="ebt">EBT card number</label>
+            <input class="input" id="ebt" name="ebt" type="text" inputmode="numeric" autocomplete="off" placeholder="0000 0000 0000 0000" aria-describedby="ebt-hint ebt-error">
+            <p class="hint" id="ebt-hint">16 digits on the front of your card. We do not check it yet.</p>
+            <p class="error" id="ebt-error" role="alert"></p>
+          </div>
+          <div class="field" role="radiogroup" aria-labelledby="dis-legend">
+            <span class="legend" id="dis-legend">Do you have a disability?</span>
+            <div class="pills">
+              <label class="pill"><input type="radio" name="disabled" value="no"><span>No</span></label>
+              <label class="pill"><input type="radio" name="disabled" value="yes"><span>Yes</span></label>
+            </div>
+            <p class="error" id="disabled-error" role="alert"></p>
+          </div>
+          <div class="field" id="disability-block" hidden>
+            <span class="legend" id="disability-file-label">Photo of your disability card or document</span>
+            <label class="upload" id="disability-file-box" for="disability-file">
+              <input type="file" id="disability-file" accept="image/*" aria-labelledby="disability-file-label" aria-describedby="disability-file-error">
+              <span class="upload-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8a2 2 0 0 1 2-2h1.5l1.2-2h6.6l1.2 2H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="u-title">Take a photo or choose a file</span><small>JPG or PNG, up to 5 MB</small></span>
+              <span class="upload-done" hidden><img alt="Preview of your disability document"><span class="u-name"></span></span>
+            </label>
+            <button type="button" class="link-btn" id="disability-file-remove" hidden>Remove photo</button>
+            <p class="error" id="disability-file-error" role="alert"></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend>Identity</legend>
+          <div class="field">
+            <span class="legend" id="stateid-label">Photo of your state ID</span>
+            <label class="upload" id="stateid-box" for="stateid">
+              <input type="file" id="stateid" accept="image/*" aria-labelledby="stateid-label" aria-describedby="stateid-error">
+              <span class="upload-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8a2 2 0 0 1 2-2h1.5l1.2-2h6.6l1.2 2H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="u-title">Take a photo or choose a file</span><small>Driver's license or state ID. JPG or PNG, up to 5 MB</small></span>
+              <span class="upload-done" hidden><img alt="Preview of your state ID photo"><span class="u-name"></span></span>
+            </label>
+            <button type="button" class="link-btn" id="stateid-remove" hidden>Remove photo</button>
+            <p class="error" id="stateid-error" role="alert"></p>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label class="check" for="consent" style="font-weight:500">
+            <input type="checkbox" id="consent" aria-describedby="consent-error">
+            <span>I confirm the information above is mine and true. I understand this is a prototype and my details are not verified yet.</span>
+          </label>
+          <p class="error" id="consent-error" role="alert"></p>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-navy" type="submit">Continue: send verification code</button>
+        </div>
+        <p class="hint" style="margin-top:10px">Next step: enter the 6-digit code to finish signing up.</p>
+        <p class="switch">Already have an account? <a href="login.html">Sign in</a></p>
+      </form>
+
+      <section id="verify-panel" hidden style="padding:0">
+        <h2>Enter your code</h2>
+        <p class="lede">We sent a 6-digit code to <strong id="sent-to"></strong>.</p>
+        <div class="alert"><strong>Demo code</strong><span class="demo-code" id="demo-code"></span></div>
+        <form id="verify-form" novalidate>
+          <span class="legend" id="otp-label">6-digit code</span>
+          <div class="otp" id="otp" role="group" aria-labelledby="otp-label">
+            <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Digit 1">
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+          </div>
+          <p class="error" id="otp-error" role="alert"></p>
+          <p class="hint" id="otp-status" role="status" aria-live="polite"></p>
+          <div class="form-actions" style="margin-top:18px">
+            <button class="btn btn-navy" type="submit">Verify and sign up</button>
+            <button class="btn btn-outline" type="button" id="resend-btn">Resend code</button>
+          </div>
+          <p class="switch"><button class="link-btn" type="button" id="change-btn">Change my details</button></p>
+        </form>
+      </section>
+
+      <section id="success-panel" hidden style="padding:0">
+        <div class="success">
+          <div class="tick" aria-hidden="true"></div>
+          <h2 id="welcome-name" tabindex="-1">Welcome</h2>
+          <p>Your account is ready. <span id="delivery-note"></span></p>
+          <a class="btn btn-gold" href="map.html">Find stores near me</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div><h4>Food Access Finder</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
+    <div><h4>Data we use</h4><ul><li>Foodshare service areas</li><li>USDA Food Access Research Atlas</li><li>CTtransit GTFS routes</li><li>Public pantry directories</li></ul></div>
+    <div><h4>Links</h4><ul><li><a href="../pages/signup.html">Sign up</a></li><li><a href="../pages/login.html">Sign in</a></li><li><a href="../index.html#how">How it works</a></li></ul></div>
+    <p class="footer-fine">Prototype for demonstration only. Store hours and stock may change; confirm before you travel.</p>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="../js/main.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>

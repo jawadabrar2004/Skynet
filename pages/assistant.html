@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Assistant chat - CT Food Access Finder</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="utility"><div class="wrap">
+  <span class="u-left"><b>Prototype.</b> Student project, not an official State of Connecticut website.</span>
+  <span class="u-right"><a href="tel:211">Need food now? Call 211</a><button type="button" data-toast="Language options will be added in a later version.">Espa&ntilde;ol</button></span>
+</div></div>
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="../index.html" aria-label="Food Access Finder home">
+      <img src="../assets/logo.svg" alt="" width="40" height="46">
+      <span class="brand-text"><small>Connecticut Food Access</small><strong>Food Access Finder</strong></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="header-menu">Menu</button>
+    <div class="header-menu" id="header-menu">
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="../index.html#how">How it works</a></li>
+          <li><a href="../index.html#travel">Ways to travel</a></li>
+          <li><a href="../index.html#help">Help</a></li>
+        </ul>
+      </nav>
+      <div class="auth-links" id="auth-links">
+        <a class="btn btn-outline btn-sm" href="../pages/login.html">Sign in</a>
+        <a class="btn btn-gold btn-sm" href="../pages/signup.html">Sign up</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main" class="wrap stub"><h1>Assistant chat</h1><p>Coming next: a chat where you describe your location and how you travel.</p><p><a class="btn btn-navy" href="../index.html">Back to home</a></p></main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div><h4>Food Access Finder</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
+    <div><h4>Data we use</h4><ul><li>Foodshare service areas</li><li>USDA Food Access Research Atlas</li><li>CTtransit GTFS routes</li><li>Public pantry directories</li></ul></div>
+    <div><h4>Links</h4><ul><li><a href="../pages/signup.html">Sign up</a></li><li><a href="../pages/login.html">Sign in</a></li><li><a href="../index.html#how">How it works</a></li></ul></div>
+    <p class="footer-fine">Prototype for demonstration only. Store hours and stock may change; confirm before you travel.</p>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="../js/main.js"></script></body></html>

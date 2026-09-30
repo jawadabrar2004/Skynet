@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Nearby SNAP/EBT stores - CT Food Access Finder</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/map.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="utility"><div class="wrap">
+  <span class="u-left"><b>Prototype.</b> Student project, not an official State of Connecticut website.</span>
+  <span class="u-right"><a href="tel:211">Need food now? Call 211</a><button type="button" data-toast="Language options will be added in a later version.">Espa&ntilde;ol</button></span>
+</div></div>
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="../index.html" aria-label="Food Access Finder home">
+      <img src="../assets/logo.svg" alt="" width="40" height="46">
+      <span class="brand-text"><small>Connecticut Food Access</small><strong>Food Access Finder</strong></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="header-menu">Menu</button>
+    <div class="header-menu" id="header-menu">
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+        </ul>
+      </nav>
+      <div class="auth-links" id="auth-links">
+        <a class="btn btn-outline btn-sm" href="login.html">Sign in</a>
+        <a class="btn btn-gold btn-sm" href="signup.html">Sign up</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="map-page">
+  <div class="wrap map-heading">
+    <div>
+      <h1>Nearby stores</h1>
+      <p>Find SNAP/EBT-authorized retailers near you and compare them by travel mode and shopping time.</p>
+    </div>
+    <div class="source-chip" title="Retailer eligibility comes from USDA SNAP retailer data">
+      <span aria-hidden="true">✓</span> USDA SNAP retailer data
+    </div>
+  </div>
+
+  <div class="wrap finder-shell">
+    <aside class="finder-panel" aria-label="Store filters and results">
+      <section class="filter-card">
+        <h2><span aria-hidden="true">◷</span> When do you want to shop?</h2>
+        <label class="radio-row"><input type="radio" name="shop-time" value="now" checked> <span>Now <small>(show stores open now when Google Places hours are available)</small></span></label>
+        <label class="radio-row"><input type="radio" name="shop-time" value="later"> <span>Choose a time</span></label>
+        <div class="time-grid" id="time-grid" aria-hidden="true">
+          <label><span>Date</span><input id="preferred-date" type="date"></label>
+          <label><span>Time</span><input id="preferred-time" type="time" value="18:00"></label>
+        </div>
+
+        <h2 class="travel-title">Travel mode</h2>
+        <div class="travel-modes" role="group" aria-label="Travel mode">
+          <button type="button" class="travel-btn active" data-mode="DRIVING" aria-pressed="true">🚗 <span>Driving</span></button>
+          <button type="button" class="travel-btn" data-mode="TRANSIT" aria-pressed="false">🚌 <span>Bus</span></button>
+          <button type="button" class="travel-btn" data-mode="WALKING" aria-pressed="false">🚶 <span>Walking</span></button>
+        </div>
+      </section>
+
+      <section class="results-section" aria-live="polite">
+        <div class="results-head">
+          <h2>Nearby SNAP/EBT stores</h2>
+          <span id="result-count">Finding stores…</span>
+        </div>
+        <div id="store-list" class="store-list">
+          <div class="loading-card"><span class="spinner" aria-hidden="true"></span><p>Getting your location and finding nearby SNAP retailers…</p></div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="map-card" aria-label="Map of nearby SNAP/EBT stores">
+      <div id="map" class="google-map"></div>
+      <div id="map-fallback" class="map-fallback" hidden>
+        <div class="fallback-grid" aria-hidden="true"></div>
+        <div class="fallback-message">
+          <strong>Google Maps is ready to connect.</strong>
+          <span>Add your Maps JavaScript API key in <code>js/config.js</code> to load the live Google map, Places hours, and route times.</span>
+        </div>
+      </div>
+      <button id="recenter-btn" class="map-control recenter" type="button" aria-label="Recenter map on my location">◎</button>
+      <div id="route-panel" class="route-panel" hidden aria-live="polite">
+        <div id="route-summary" class="route-summary"></div>
+        <button id="clear-route-btn" type="button" class="clear-route-btn" aria-label="Clear route">×</button>
+      </div>
+      <div class="map-legend" aria-label="Map legend">
+        <span><i class="legend-dot user"></i>Your location</span>
+        <span><i class="legend-pin open"></i>SNAP store</span>
+        <span><i class="legend-pin closed"></i>Closed / hours unavailable</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap map-note">
+    <strong>Prototype note:</strong> SNAP authorization is sourced from USDA retailer data. Store hours and route times are enriched through Google Maps Platform when configured. Always confirm hours before traveling.
+  </div>
+</main>
+
+<footer class="site-footer map-footer">
+  <div class="wrap footer-grid">
+    <div><h4>Food Access Finder</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
+    <div><h4>Data we use</h4><ul><li>USDA SNAP retailer data</li><li>Google Maps Platform</li><li>CTtransit routes</li><li>Public pantry directories</li></ul></div>
+    <div><h4>Links</h4><ul><li><a href="signup.html">Sign up</a></li><li><a href="login.html">Sign in</a></li><li><a href="../index.html#how">How it works</a></li></ul></div>
+    <p class="footer-fine">Prototype for demonstration only. Store hours and stock may change; confirm before you travel.</p>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="../js/main.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/map.js"></script>
+</body>
+</html>

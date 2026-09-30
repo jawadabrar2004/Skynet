@@ -1,70 +1,53 @@
-# CT SNAP Checker (standalone version)
+# CT Food Access Finder
 
-A website where you type what you want to buy, or a meal like "I want to make a burger,"
-and AI tells you what Connecticut SNAP covers, with quantity and size controls.
-
-## What you need (one time)
-
-1. **Node.js 18 or newer.** Download the "LTS" version from https://nodejs.org and install it.
-2. **A Claude API key.**
-   - Go to https://console.anthropic.com and create an account.
-   - Add a payment method and some credit under **Billing** (a few dollars lasts a long time for this app).
-   - Go to **API Keys**, click **Create Key**, and copy it. It starts with `sk-ant-`.
-
-## Setup
-
-1. Unzip this folder anywhere on your computer.
-2. Run the app once (see below), or copy **config.example.txt** to a new file named **config.txt**.
-   Open **config.txt** (Notepad on Windows, TextEdit on Mac).
-3. Paste your key after `ANTHROPIC_API_KEY=`, like this:
-
-   ```
-   ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxx
-   ```
-
-4. Save the file.
+Plain HTML, CSS, and JavaScript. No build step.
 
 ## Run it
+Open `index.html` in a browser, or run `python3 -m http.server 8000` in this folder and visit http://localhost:8000
 
-- **Windows:** double-click `start-windows.bat`
-- **Mac:** double-click `start-mac.command`
-  (the first time, you may need to right-click it and choose **Open**)
-- **Any computer, from a terminal:** open a terminal in this folder and run `node server.js`
+## Structure
+    ct-food-access/
+    ├── index.html            Landing page (hero banner, options, how it works)
+    ├── css/styles.css        Design tokens, layout, forms, responsive rules
+    ├── js/
+    │   ├── main.js           Mobile menu, toast, signed-in header
+    │   └── auth.js           Sign up + sign in with phone OTP (DEMO)
+    ├── assets/
+    │   ├── hero.jpg          ADD THIS: a real photo of people (landscape, ~1200x900)
+    │   ├── logo.svg
+    │   └── favicon.svg
+    └── pages/
+        ├── signup.html       Details, uploads, OTP verification
+        ├── login.html        Phone + OTP
+        ├── assistant.html    (placeholder) chatbot
+        ├── map.html          Live SNAP/EBT retailer finder + Google map
+        └── order.html        (placeholder) pickup/delivery, bill, checkout
 
-Then open **http://localhost:3000** in your browser. Keep the black window open while you use the site.
+## Banner photo
+Save a real photo of people (landscape, about 1200x900, under 400 KB) as `assets/hero.jpg`. It is used on the landing page and the sign up / sign in pages. It fills the hero panel behind the sample results card. Until it exists, the panel shows a soft blue, green and gold background, so the page still looks finished. Use photos you have the right to use: your own, ones with permission, or free-license sites such as unsplash.com and pexels.com (search: "community food market", "senior grocery shopping", "food pantry volunteers").
 
-You'll know the AI is working when the receipts **don't** show the line
-"Quick check by keyword matching." If something is wrong, the page shows a red message saying what to fix.
+## Demo OTP
+No SMS is sent. The 6-digit code is displayed on screen. The browser only keeps first name, phone, age, and delivery eligibility (localStorage). EBT numbers and photos are never stored.
+For a real launch: use an SMS provider (Twilio Verify or Firebase Auth), a secure backend for uploads, and real EBT/ID/disability verification.
 
-## Keep your key safe (and working)
+## Breakpoints
+1000px (auth pages stack), 820px (mobile menu, one column), 560px (small phones)
 
-If your key ever appears in a public GitHub repo, GitHub's secret scanning finds it and
-Anthropic disables it automatically, usually within minutes. To stop that from happening:
 
-- Your key goes **only** in `config.txt`. The repo has `config.example.txt` instead, a blank template.
-- `config.txt` is listed in `.gitignore`, so `git add` / `git push` and GitHub Desktop skip it.
-- **If you upload with GitHub's "Add files via upload" page, `.gitignore` does NOT apply.**
-  Never drag `config.txt` (or the whole folder) onto that page. Upload the other files one by one.
-- Never put your key inside `index.html` or `server.js`.
-- The key stays on the server (`server.js`); the website never sees it.
-- `MAX_CHECKS_PER_MINUTE` in `config.txt` limits how many checks each visitor can run, to protect your bill.
+## Nearby SNAP/EBT map
+The map page is now integrated at `pages/map.html`. It:
+- requests browser geolocation (with Hartford as the demo fallback),
+- queries the USDA SNAP retailer ArcGIS layer for nearby authorized retailers,
+- ranks stores by distance,
+- supports Driving / Bus / Walking modes,
+- supports Now or a chosen shopping time, and
+- enriches nearby results with Google Maps Platform when configured.
 
-## Putting it online later
+### Google Maps API setup
+Open `js/config.js` and set `GOOGLE_MAPS_API_KEY`. Use a browser-restricted Google Maps Platform key and enable the Maps JavaScript API, Places API, and Routes API. The page uses the current Maps JavaScript Routes Library (`Route` and `RouteMatrix`) for in-page route drawing and route-aware ranking. If route data is unavailable, the interface falls back to straight-line distance while the map and SNAP retailer results continue working.
 
-This runs on your own computer. To make it a public website, upload the whole folder to a host that runs
-Node.js (for example Render, Railway, or a small VPS), and set `ANTHROPIC_API_KEY` in the host's
-environment settings instead of putting it in `config.txt`.
+Do not commit a production API key to a public repository. Restrict the key to the hackathon site origin in Google Cloud Console.
 
-## Updating the SNAP rules
 
-The rules the AI follows are in `server.js`, in the `RULES` text near the top.
-If Connecticut changes its SNAP rules (for example, bans soda or candy), edit that text and restart.
-
-## Files
-
-- `server.js` – the small server that talks to Claude (no installs needed)
-- `public/index.html` – the website
-- `config.example.txt` – blank settings template (safe to share)
-- `config.txt` – your real settings with your API key (created on first run, never uploaded)
-- `.gitignore` – keeps `config.txt` and `.env` out of git
-- `start-windows.bat`, `start-mac.command` – double-click launchers
+## In-page directions
+The map page renders routes directly inside the existing Google map. Clicking **Directions** no longer opens Google Maps in a new tab. Enable the Google **Routes API** for the same API key in addition to Maps JavaScript API and Places API. The project no longer depends on the legacy Directions API or Distance Matrix API.
