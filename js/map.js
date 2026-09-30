@@ -106,8 +106,7 @@
 
     els.recenter?.addEventListener('click', () => {
       if (state.map && state.userLocation) {
-        state.map.panTo(state.userLocation);
-        state.map.setZoom(13);
+        fitMapToStores();
       }
     });
 
@@ -424,14 +423,14 @@
           <div class="store-main">
             <div class="store-name-row"><span class="store-name">${escapeHtml(store.name)}</span><span class="snap-tag">SNAP/EBT ✓</span></div>
             <div class="store-meta">${escapeHtml(store.type || 'Retailer')}</div>
-            <div class="store-address">⌖ ${escapeHtml(store.address)}</div>
+            <div class="store-address" title="${escapeAttr(store.address)}">⌖ ${escapeHtml(store.address)}</div>
             <div class="store-hours ${statusClass}">◷ ${hours}</div>
           </div>
           <div class="store-side">
             <div class="store-distance">${miles.toFixed(1)} mi</div>
             <div class="store-duration">${routeLabel}</div>
-            <button class="direction-link" type="button" data-route-id="${escapeAttr(store.id)}" aria-label="Show directions to ${escapeAttr(store.name)} on this map">➤ Directions</button>
           </div>
+          <button class="direction-link" type="button" data-route-id="${escapeAttr(store.id)}" aria-label="Show directions to ${escapeAttr(store.name)} on this map">➤ Directions</button>
         </article>`;
     }).join('');
 
@@ -516,8 +515,14 @@
     if (!state.map || !state.stores.length) return;
     const bounds = new google.maps.LatLngBounds();
     bounds.extend(state.userLocation);
-    state.stores.slice(0, 10).forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
+    // Zoom in on the closest stores: enough to show at least 5, without pulling out for far-away ones.
+    const nearest = [...state.stores].sort((a, b) => a.straightMiles - b.straightMiles).slice(0, 5);
+    nearest.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
     state.map.fitBounds(bounds, 55);
+    // If the closest stores are all right next door, don't zoom in past street level.
+    google.maps.event.addListenerOnce(state.map, 'idle', () => {
+      if (state.map.getZoom() > 16) state.map.setZoom(16);
+    });
   }
 
   async function showRouteToStore(store, options = {}) {
