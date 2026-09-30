@@ -493,7 +493,22 @@
 
     // Keep the cart in this browser so the order page can pick it up later.
     try { localStorage.setItem("ctfa_cart", JSON.stringify({ at: Date.now(), items: lines, total: priced ? Math.round(sum * 100) / 100 : null })); } catch {}
-    thread.append(el("p", "bot", "Your cart is saved. Want to start a new list? Just type what you want."));
+    // Cart confirmed: ask the shopper to sign in, then take them to the sign-in page.
+    const next = el("div", "next");
+    next.append(el("p", "ask", "Your cart is saved. Please sign in to continue."));
+    const wait = el("p", "hint", "Taking you to sign in…");
+    next.append(wait);
+    const go = el("a", "btn btn-navy", "Sign in now"); go.href = "login.html";
+    next.append(go);
+    thread.append(next);
+    box.disabled = true; send.disabled = true;
+    let left = 5;
+    const tick = () => {
+      if (left <= 0) { location.href = "login.html"; return; }
+      wait.textContent = "Taking you to sign in in " + left + (left === 1 ? " second…" : " seconds…");
+      left--; setTimeout(tick, 1000);
+    };
+    tick();
   }
 
   form.addEventListener("submit", (ev) => {
