@@ -1,29 +1,10 @@
-/* CT Food Access Finder - sign up and sign in (DEMO).
-   No text messages are sent: the one-time code is shown on screen so the flow can be tested.
-   To go live, replace genCode()/verify with a real SMS provider (Twilio Verify, Firebase Auth, etc.)
-   and send uploads + EBT number to a secure backend. Nothing sensitive is stored in the browser. */
+/* Doorstep - sign up and sign in with a phone number and a one-time code.
+   The server (server-auth.js) creates the code, checks it, saves the account, and signs you in
+   with a secure cookie. In demo mode (no Twilio settings) the server returns the code so it can be
+   shown on screen. EBT numbers and photos are checked here only and are never sent or stored. */
 (function () {
   'use strict';
-  var USERS = 'ctfa_users', SESSION = 'ctfa_session', mem = {};
 
-  function read(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : (mem[k] || null); } catch (e) { return mem[k] || null; } }
-  function write(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-
-  function getValidSession() {
-    var session = read(SESSION);
-    if (!session || !session.phone) return null;
-    var users = read(USERS) || {};
-    var user = users[session.phone];
-    if (!user) return null;
-    return { phone: session.phone, first: session.first || user.first || '' };
-  }
-
-  function redirectSignedInUser() {
-    if (!getValidSession()) return false;
-    // Authentication pages live beside map.html in /pages/.
-    window.location.replace('map.html');
-    return true;
-  }
   function $(s, r) { return (r || document).querySelector(s); }
   function $all(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
   function digits(s) { return String(s || '').replace(/\D/g, ''); }
@@ -35,12 +16,47 @@
     return d ? '(' + d : '';
   }
   function fmtEbt(s) { return digits(s).slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 '); }
-  function genCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
+  function mask(phone) { return '(•••) •••-' + phone.slice(6); }
+
+  function api(path, body) {
+    return fetch(path, {
+      method: body ? 'POST' : 'GET',
+      headers: body ? { 'Content-Type': 'application/json' } : {},
+      credentials: 'same-origin',
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (d) { d.status = r.status; return d; });
+    }, function () { return { status: 0, error: 'offline' }; });
+  }
+
+  var MESSAGES = {
+    offline: 'Could not reach the Doorstep server. Start it with start-mac.command or start-windows.bat, then open http://localhost:3000.',
+    rate_limited: 'Too many tries. Wait a minute and try again.',
+    sms_failed: 'We could not send a text to this number. Check it and try again.',
+    code_expired: 'That code has expired. Tap Resend code to get a new one.',
+    too_many_tries: 'Too many wrong codes. Tap Resend code to get a new one.',
+    exists: 'An account already exists for this number. Sign in instead.',
+    no_account: 'We could not find an account for this number. Sign up first.',
+    server_error: 'Something went wrong on our side. Try again.'
+  };
+  function message(d) {
+    if (d.error === 'wrong_code') return 'That code does not match. ' + (d.left > 0 ? d.left + (d.left === 1 ? ' try' : ' tries') + ' left.' : 'Tap Resend code to get a new one.');
+    if (d.error === 'too_soon') return 'Please wait ' + d.wait + ' seconds before asking for another code.';
+    return MESSAGES[d.error] || MESSAGES.server_error;
+  }
+
+  // The code is shown on screen only in demo mode (the server returns it only when no SMS is set up).
+  function showCode(d) {
+    $('#demo-code').textContent = d.demoCode || '';
+    $('#verify-panel .alert').hidden = !d.demoCode;
+  }
+
   function setErr(id, msg) {
     var e = $('#' + id + '-error'); if (e) e.textContent = msg || '';
     var c = $('#' + id); if (c) c.setAttribute('aria-invalid', msg ? 'true' : 'false');
     var box = $('#' + id + '-box'); if (box) box.setAttribute('aria-invalid', msg ? 'true' : 'false');
   }
+  function busy(btn, on) { btn.disabled = on; btn.setAttribute('aria-busy', on ? 'true' : 'false'); }
   function startTimer(btn, secs) {
     clearInterval(btn._t); var left = secs; btn.disabled = true;
     function tick() {
@@ -49,6 +65,13 @@
       left--;
     }
     tick(); btn._t = setInterval(tick, 1000);
+  }
+  function step(n) {
+    $('#sb1').className = n === 1 ? 'current' : 'done';
+    $('#sb2').className = n === 2 ? 'current' : n > 2 ? 'done' : '';
+    ['#sb1', '#sb2'].forEach(function (id, i) {
+      if (n === i + 1) $(id).setAttribute('aria-current', 'step'); else $(id).removeAttribute('aria-current');
+    });
   }
 
   function initUpload(id) {
@@ -96,15 +119,53 @@
     };
   }
 
-  function mask(phone) { return '(\u2022\u2022\u2022) \u2022\u2022\u2022-' + phone.slice(6); }
+  // Shared "enter the code" step for both sign up and sign in.
+  function initVerify(opts) {
+    var otp = initOtp($('#otp')), resend = $('#resend-btn'), err = $('#otp-error'), status = $('#otp-status');
+
+    function codeSent(d) {
+      showCode(d); otp.clear(); err.textContent = '';
+      startTimer(resend, 30);
+    }
+    resend.addEventListener('click', function () {
+      busy(resend, true); status.textContent = '';
+      opts.start().then(function (d) {
+        if (d.status === 200) { codeSent(d); status.textContent = 'A new code was sent.'; }
+        else { resend.disabled = false; err.textContent = message(d); }
+      });
+    });
+    $('#change-btn').addEventListener('click', function () {
+      $('#verify-panel').hidden = true; opts.form.hidden = false; step(1); opts.back();
+    });
+    $('#verify-form').addEventListener('submit', function (e) {
+      e.preventDefault(); status.textContent = '';
+      var v = otp.value(), btn = $('#verify-form button[type="submit"]');
+      if (v.length < 6) { err.textContent = 'Enter all 6 digits.'; otp.bad(); return; }
+      busy(btn, true);
+      opts.verify(v).then(function (d) {
+        busy(btn, false);
+        if (d.status === 200 && d.user) { err.textContent = ''; opts.done(d.user); return; }
+        err.textContent = message(d); otp.bad();
+      });
+    });
+    return function show(d) {
+      codeSent(d);
+      opts.form.hidden = true; $('#verify-panel').hidden = false; step(2);
+      $('#sent-to').textContent = mask(opts.phone());
+      otp.focus();
+    };
+  }
+
+  function redirectIfSignedIn() {
+    api('/api/auth/me').then(function (d) { if (d.user) window.location.replace('map.html'); });
+  }
 
   /* ---------- Sign up ---------- */
   function initSignup() {
-    if (redirectSignedInUser()) return;
+    redirectIfSignedIn();
     var form = $('#signup-form'), phone = $('#phone'), ebt = $('#ebt');
     var stateUp = initUpload('stateid'), disUp = initUpload('disability-file');
-    var disBlock = $('#disability-block'), state = { code: '', data: null };
-    var otp = initOtp($('#otp'));
+    var disBlock = $('#disability-block'), profile = null;
 
     phone.addEventListener('input', function () { phone.value = fmtPhone(phone.value); });
     ebt.addEventListener('input', function () { ebt.value = fmtEbt(ebt.value); });
@@ -123,10 +184,7 @@
       chk('lastName', $('#lastName').value.trim().length > 0, 'Enter your last name.');
       var em = $('#email').value.trim();
       chk('email', !em || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em), 'Enter a valid email, or leave it blank.');
-      var p = normPhone(phone.value);
-      var users = read(USERS) || {};
-      chk('phone', p.length === 10, 'Enter a 10-digit phone number.');
-      if (p.length === 10 && users[p]) chk('phone', false, 'An account already exists for this number. Sign in instead.');
+      chk('phone', normPhone(phone.value).length === 10, 'Enter a 10-digit phone number.');
       chk('ebt', digits(ebt.value).length === 16, 'Enter the 16-digit number on the front of your EBT card.');
       var age = parseInt($('#age').value, 10);
       chk('age', age >= 18 && age <= 120, 'Enter your age (18 or older).');
@@ -139,88 +197,75 @@
       return first;
     }
 
+    // Only the profile goes to the server. The EBT number and photos stay on this page.
+    function start() { return api('/api/auth/signup/start', profile); }
+
+    var showVerify = initVerify({
+      form: form,
+      phone: function () { return profile.phone; },
+      start: start,
+      back: function () { phone.focus(); },
+      verify: function (code) { return api('/api/auth/signup/verify', { phone: profile.phone, code: code }); },
+      done: function (user) {
+        $('#verify-panel').hidden = true; $('#success-panel').hidden = false; step(3);
+        $('#welcome-name').textContent = 'Welcome, ' + user.first;
+        $('#delivery-note').textContent = user.deliveryEligible
+          ? 'You can request delivery when you place an order.'
+          : 'You can order for pickup. Delivery is available for seniors (60+) and people with a disability.';
+        $('#success-panel h2').focus();
+      }
+    });
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var bad = validate(); if (bad) { bad.focus(); return; }
-      var dis = $('input[name="disabled"]:checked').value === 'yes', age = parseInt($('#age').value, 10);
-      state.data = {
-        first: $('#firstName').value.trim(), last: $('#lastName').value.trim(),
-        phone: normPhone(phone.value), age: age, disabled: dis, transport: $('#transport').value,
-        deliveryEligible: dis || age >= 60
+      profile = {
+        first: $('#firstName').value.trim(), last: $('#lastName').value.trim(), email: $('#email').value.trim(),
+        phone: normPhone(phone.value), age: parseInt($('#age').value, 10), transport: $('#transport').value,
+        disabled: $('input[name="disabled"]:checked').value === 'yes'
       };
-      sendCode();
-      form.hidden = true; $('#verify-panel').hidden = false;
-      $('#sb1').className = 'done'; $('#sb1').removeAttribute('aria-current');
-      $('#sb2').className = 'current'; $('#sb2').setAttribute('aria-current', 'step');
-      $('#sent-to').textContent = mask(state.data.phone);
-      otp.focus(); window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    function sendCode() {
-      state.code = genCode(); $('#demo-code').textContent = state.code;
-      startTimer($('#resend-btn'), 30);
-    }
-    $('#resend-btn').addEventListener('click', function () {
-      sendCode(); otp.clear(); $('#otp-error').textContent = ''; $('#otp-status').textContent = 'A new code was sent.';
-    });
-    $('#change-btn').addEventListener('click', function () {
-      $('#verify-panel').hidden = true; form.hidden = false;
-      $('#sb2').className = ''; $('#sb2').removeAttribute('aria-current');
-      $('#sb1').className = 'current'; $('#sb1').setAttribute('aria-current', 'step');
-      phone.focus();
-    });
-    $('#verify-form').addEventListener('submit', function (e) {
-      e.preventDefault(); var v = otp.value(), err = $('#otp-error'); $('#otp-status').textContent = '';
-      if (v.length < 6) { err.textContent = 'Enter all 6 digits.'; otp.bad(); return; }
-      if (v !== state.code) { err.textContent = 'That code does not match. Check it and try again.'; otp.bad(); return; }
-      var users = read(USERS) || {}, d = state.data;
-      users[d.phone] = { first: d.first, last: d.last, age: d.age, disabled: d.disabled, transport: d.transport, deliveryEligible: d.deliveryEligible };
-      write(USERS, users); write(SESSION, { phone: d.phone, first: d.first });
-      $('#verify-panel').hidden = true; $('#success-panel').hidden = false;
-      $('#sb2').className = 'done'; $('#sb2').removeAttribute('aria-current');
-      $('#welcome-name').textContent = 'Welcome, ' + d.first;
-      $('#delivery-note').textContent = d.deliveryEligible
-        ? 'You can request delivery when you place an order.'
-        : 'You can order for pickup. Delivery is available for seniors (60+) and people with a disability.';
-      $('#success-panel h2').focus();
+      var btn = $('button[type="submit"]', form); busy(btn, true);
+      start().then(function (d) {
+        busy(btn, false);
+        if (d.status === 200) { showVerify(d); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+        if (d.errors) {
+          var firstBad = null;
+          Object.keys(d.errors).forEach(function (k) { setErr(k, d.errors[k]); firstBad = firstBad || $('#' + k) || $('[name="' + k + '"]'); });
+          if (firstBad) firstBad.focus();
+          return;
+        }
+        setErr('phone', message(d)); phone.focus();
+      });
     });
   }
 
   /* ---------- Sign in ---------- */
   function initLogin() {
-    if (redirectSignedInUser()) return;
-    var form = $('#login-form'), phone = $('#phone'), state = { code: '', phone: '' };
-    var otp = initOtp($('#otp'));
+    redirectIfSignedIn();
+    var form = $('#login-form'), phone = $('#phone'), p = '';
     phone.addEventListener('input', function () { phone.value = fmtPhone(phone.value); });
 
-    function sendCode() { state.code = genCode(); $('#demo-code').textContent = state.code; startTimer($('#resend-btn'), 30); }
+    function start() { return api('/api/auth/login/start', { phone: p }); }
+
+    var showVerify = initVerify({
+      form: form,
+      phone: function () { return p; },
+      start: start,
+      back: function () { phone.focus(); },
+      verify: function (code) { return api('/api/auth/login/verify', { phone: p, code: code }); },
+      done: function () { window.location.href = 'map.html'; }
+    });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var p = normPhone(phone.value), users = read(USERS) || {};
+      p = normPhone(phone.value);
       if (p.length !== 10) { setErr('phone', 'Enter your 10-digit phone number.'); phone.focus(); return; }
-      if (!users[p]) { setErr('phone', 'We could not find an account for this number. Sign up first.'); phone.focus(); return; }
-      setErr('phone', ''); state.phone = p; sendCode();
-      form.hidden = true; $('#verify-panel').hidden = false;
-      $('#sb1').className = 'done'; $('#sb1').removeAttribute('aria-current');
-      $('#sb2').className = 'current'; $('#sb2').setAttribute('aria-current', 'step');
-      $('#sent-to').textContent = mask(p); otp.focus();
-    });
-    $('#resend-btn').addEventListener('click', function () {
-      sendCode(); otp.clear(); $('#otp-error').textContent = ''; $('#otp-status').textContent = 'A new code was sent.';
-    });
-    $('#change-btn').addEventListener('click', function () {
-      $('#verify-panel').hidden = true; form.hidden = false;
-      $('#sb2').className = ''; $('#sb2').removeAttribute('aria-current');
-      $('#sb1').className = 'current'; $('#sb1').setAttribute('aria-current', 'step'); phone.focus();
-    });
-    $('#verify-form').addEventListener('submit', function (e) {
-      e.preventDefault(); var v = otp.value(), err = $('#otp-error');
-      if (v.length < 6) { err.textContent = 'Enter all 6 digits.'; otp.bad(); return; }
-      if (v !== state.code) { err.textContent = 'That code does not match. Check it and try again.'; otp.bad(); return; }
-      var users = read(USERS) || {}, u = users[state.phone];
-      write(SESSION, { phone: state.phone, first: u ? u.first : '' });
-      window.location.href = 'map.html';
+      var btn = $('button[type="submit"]', form); busy(btn, true);
+      start().then(function (d) {
+        busy(btn, false);
+        if (d.status === 200) { setErr('phone', ''); showVerify(d); return; }
+        setErr('phone', (d.errors && d.errors.phone) || message(d)); phone.focus();
+      });
     });
   }
 

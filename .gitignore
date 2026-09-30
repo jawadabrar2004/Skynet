@@ -1,3 +1,7 @@
 # Your real settings (API key). Never commit these.
 config.txt
 .env
+
+# Saved accounts and sessions (personal data). Never commit these.
+data/
+.DS_Store
