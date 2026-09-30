@@ -240,7 +240,12 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log("\n  Doorstep is running.");
-  console.log("  Open this in your browser:  http://localhost:" + PORT + "\n");
+  console.log("  Open this in your browser:  http://localhost:" + PORT);
+  // Addresses other people on the same Wi-Fi can open (phones, other laptops).
+  const lan = Object.values(require("os").networkInterfaces()).flat()
+    .filter(a => a && a.family === "IPv4" && !a.internal).map(a => "http://" + a.address + ":" + PORT);
+  if (lan.length) console.log("  On the same Wi-Fi, others can open:  " + lan.join("  or  "));
+  console.log("");
   if (!API_KEY) {
     console.log("  WARNING: No API key found. The AI is OFF and the page will use the basic keyword check.");
     console.log("  Open config.txt, paste your key after ANTHROPIC_API_KEY=, save, then restart.\n");
