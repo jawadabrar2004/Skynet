@@ -7,6 +7,12 @@
   const box = document.getElementById("box");
   const send = document.getElementById("send");
 
+  // The shopper's list so far: live item objects from the receipts, so quantity and size changes count.
+  // It keeps growing until the shopper confirms it; then it becomes the cart and a new list starts.
+  let list = [];
+  const CONFIRM = /^(confirm|confirmed|confirm (it|this|list|my list|the list)|yes,? confirm|done|i'?m done|that'?s (all|it)|checkout|check out|no more|nothing else)[.!]*$/i;
+  const ADD_MORE = /^(add|add more|add more items|more|more items|yes,? add more|i want to add more)[.!]*$/i;
+
 
   // Offline fallback: simple keyword classifier
   const NO = [
@@ -240,9 +246,11 @@
       const eligible = picked.filter(x => x.eligible !== false);
       const not_eligible = picked.filter(x => x.eligible === false).map(x => ({ item: x.item, reason: x.reason || "Not covered by SNAP" }));
       renderReceipt({ eligible, not_eligible, depends: [] }, usedAI, dishName + " groceries");
-      thread.lastElementChild.scrollIntoView({ block: "start", behavior: "smooth" });
+      const added = thread.lastElementChild;
+      askNext();
+      added.scrollIntoView({ block: "start", behavior: "smooth" });
     };
-    no.onclick = () => finish("No problem. Tell me anything else you want to buy.");
+    no.onclick = () => { finish("No problem."); askNext(); };
     thread.append(c);
   }
 
@@ -270,6 +278,7 @@
       r.append(el("p", null, data.note || "I didn’t find any items. List what you want to buy, separated by commas."));
       thread.append(r); return;
     }
+    list.push(...e.map(it => ({ it, check: false })), ...d.map(it => ({ it, check: true })));
     [section("yes", "SNAP covers these", "✓", e, true, updateTotal),
      section("maybe", "Check before you buy", "?", d, true, updateTotal),
      section("no", "SNAP won’t cover these", "✕", n, false)].forEach(x => x && r.append(x));
@@ -330,9 +339,161 @@
     status.remove();
     const before = thread.children.length + 1;
     renderReceipt(data, usedAI);
+    askNext();
     send.disabled = false;
     const first = thread.children[before - 1] || thread.lastElementChild;
     if (first) first.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
+  function handle(text) {
+    if (CONFIRM.test(text)) return confirmList(text);
+    if (ADD_MORE.test(text)) return addMore(text);
+    check(text);
+  }
+
+  function itemCount() { return list.reduce((a, x) => a + x.it.qty, 0); }
+
+  // "Do you want to add more items, or confirm this list?" — shown after every answer until the list is confirmed.
+  function askNext() {
+    thread.querySelectorAll(".next").forEach(x => x.remove());
+    if (!list.length) return;
+    const c = el("div", "next");
+    c.append(el("p", "ask", "Do you want to add more items, or confirm this list?"));
+    const n = itemCount();
+    c.append(el("p", "hint", "Your list has " + n + (n === 1 ? " SNAP item" : " SNAP items") +
+      " so far. You can still change amounts and sizes above. Type more items, or type “confirm”."));
+    const actions = el("div", "actions");
+    const ok = el("button", "primary", "Confirm list"); ok.type = "button";
+    const more = el("button", "secondary", "Add more items"); more.type = "button";
+    ok.onclick = () => confirmList("Confirm list");
+    more.onclick = () => addMore("Add more items");
+    actions.append(ok, more);
+    c.append(actions);
+    thread.append(c);
+  }
+
+  function addMore(text) {
+    thread.querySelectorAll(".next").forEach(x => x.remove());
+    thread.append(el("div", "you", text));
+    thread.append(el("p", "bot", list.length ? "Sure. What else do you want to add?" : "Sure. What do you want to eat or buy?"));
+    box.placeholder = "Type more items…";
+    box.focus();
+    thread.lastElementChild.scrollIntoView({ block: "end", behavior: "smooth" });
+  }
+
+  // Same item, type and size from different messages become one cart line.
+  function cartLines() {
+    const lines = [], byKey = new Map();
+    for (const { it, check } of list) {
+      const key = [it.item, it.option, it.size].map(v => String(v || "").toLowerCase().trim()).join("|");
+      const had = byKey.get(key);
+      if (had) { had.qty = Math.min(99, had.qty + it.qty); had.check = had.check || check; continue; }
+      const line = { item: String(it.item), option: it.option || "", size: it.size || "", qty: it.qty, check, price: null };
+      byKey.set(key, line); lines.push(line);
+    }
+    return lines;
+  }
+
+  const money = v => "$" + v.toFixed(2);
+
+  async function confirmList(text) {
+    thread.querySelectorAll(".next").forEach(x => x.remove());
+    thread.append(el("div", "you", text));
+    if (!list.length) {
+      thread.append(el("p", "bot", "Your list is empty. Tell me what you want to eat or buy first."));
+      return;
+    }
+    const lines = cartLines();
+    list = [];
+    box.placeholder = "Type what you want…";
+    // The confirmed list is final: lock the earlier receipts so they can't drift from the cart.
+    thread.querySelectorAll(".receipt:not(.cart) button, .receipt:not(.cart) select, .receipt:not(.cart) input")
+      .forEach(x => { x.disabled = true; });
+
+    const c = el("div", "receipt cart");
+    const head = el("div", "head");
+    head.append(el("strong", null, "Your cart"));
+    head.append(el("span", null, new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })));
+    c.append(head);
+    const ul = el("ul", "cart-lines");
+    const cells = lines.map(x => {
+      const li = el("li");
+      const name = el("div", "name");
+      name.append(el("b", null, x.qty + " × " + x.item));
+      const detail = el("small", null, [x.option, x.size].filter(Boolean).join(", "));
+      const each = el("small", "each", "Estimating price…");
+      name.append(detail, each);
+      if (x.check) name.append(el("small", "flag", "Check the label before you buy"));
+      const price = el("span", "price", "…");
+      li.append(name, price);
+      ul.append(li);
+      return { each, price };
+    });
+    c.append(ul);
+    const total = el("p", "cart-total", "Estimated total: working it out…");
+    c.append(total);
+    const note = el("p", "src", "Price estimates are typical Connecticut grocery prices, not quotes. Actual prices vary by store, brand and sales.");
+    c.append(note);
+    thread.append(c);
+    c.scrollIntoView({ block: "start", behavior: "smooth" });
+
+    send.disabled = true;
+    let prices = null, problem = "";
+    try {
+      const res = await fetch("/api/prices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: lines.map(x => ({ item: x.item, option: x.option, size: x.size })) })
+      });
+      const body = await res.json().catch(() => null);
+      if (res.ok && body && Array.isArray(body.prices)) prices = body.prices;
+      else {
+        const msgs = {
+          no_key: "Price estimates need the AI: add your API key to config.txt and restart the server.",
+          bad_key: "Price estimates need the AI, but the API key was rejected. Check the key in config.txt.",
+          rate_limited: "Too many requests right now. Try again in a minute for price estimates.",
+          no_credit: "Price estimates need the AI, but your API account is out of credit."
+        };
+        problem = msgs[body && body.error] || "The AI couldn’t estimate prices this time.";
+      }
+    } catch { problem = "Can’t reach the server for price estimates. Make sure it’s running (see README)."; }
+    send.disabled = false;
+
+    let sum = 0, priced = 0;
+    lines.forEach((x, i) => {
+      const v = prices ? Number(prices[i]) : NaN;
+      if (prices && prices[i] != null && isFinite(v) && v > 0) {
+        x.price = v; sum += v * x.qty; priced++;
+        cells[i].each.textContent = money(v) + " each";
+        cells[i].price.textContent = money(v * x.qty);
+      } else {
+        cells[i].each.textContent = "No price estimate";
+        cells[i].price.textContent = "—";
+      }
+    });
+    if (priced) {
+      total.textContent = "Estimated total: " + money(sum) +
+        (priced < lines.length ? " (" + (lines.length - priced) + " without an estimate)" : "");
+    } else {
+      total.textContent = "No price estimates.";
+      c.insertBefore(el("p", "error", problem || "No price estimates were available for these items."), total);
+    }
+
+    const foot = el("div", "foot");
+    const btn = el("button", null, "Copy my cart"); btn.type = "button";
+    const msg = el("span", "copied");
+    btn.onclick = async () => {
+      const txt = "My cart:\n" + lines.map(x => lineFor(x) + (x.price ? " — " + money(x.price * x.qty) : "")).join("\n") +
+        (priced ? "\n\nEstimated total: " + money(sum) : "");
+      try { await navigator.clipboard.writeText(txt); msg.textContent = "Copied"; }
+      catch { msg.textContent = "Couldn’t copy. Select the cart and copy it by hand."; }
+    };
+    foot.append(btn, msg);
+    c.append(foot);
+
+    // Keep the cart in this browser so the order page can pick it up later.
+    try { localStorage.setItem("ctfa_cart", JSON.stringify({ at: Date.now(), items: lines, total: priced ? Math.round(sum * 100) / 100 : null })); } catch {}
+    thread.append(el("p", "bot", "Your cart is saved. Want to start a new list? Just type what you want."));
   }
 
   form.addEventListener("submit", (ev) => {
@@ -340,7 +501,7 @@
     const t = box.value.trim();
     if (!t || send.disabled) return;
     box.value = ""; box.style.height = "";
-    check(t);
+    handle(t);
   });
   box.addEventListener("keydown", (ev) => {
     if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); form.requestSubmit(); }
@@ -355,7 +516,7 @@
   const q = new URLSearchParams(location.search).get("q");
   if (q && q.trim()) {
     history.replaceState(null, "", location.pathname);
-    check(q.trim().slice(0, 4000));
+    handle(q.trim().slice(0, 4000));
   } else if (!matchMedia("(max-width: 820px)").matches) {
     box.focus({ preventScroll: true });
   }

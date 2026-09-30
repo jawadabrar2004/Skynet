@@ -94,6 +94,30 @@
 .dish .actions .primary{background:var(--navy);color:#fff;font-weight:700}
 .dish .actions .secondary{background:transparent;color:var(--ink);border-color:var(--line)}
 .dish .actions button:disabled{opacity:.5;cursor:default}
+/* "Add more items, or confirm?" and the assistant's short replies */
+.next{align-self:stretch;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--gold);border-radius:var(--radius);padding:16px 18px}
+.next .ask{font-weight:700;font-size:18px;margin:0 0 4px}
+.next .hint{margin:0 0 12px}
+.next .actions,.dish .actions{display:flex;flex-wrap:wrap;gap:10px}
+.next .actions button{
+  font:inherit;font-size:16px;cursor:pointer;padding:9px 16px;border-radius:6px;border:2px solid var(--navy);min-height:44px
+}
+.next .actions .primary{background:var(--navy);color:#fff;font-weight:700}
+.next .actions .secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+.bot{align-self:flex-start;margin:0;background:var(--card);border:1px solid var(--line);padding:11px 16px;border-radius:18px 18px 18px 5px;max-width:85%}
+
+/* The cart, with price estimates */
+.cart .cart-lines{list-style:none;margin:0;padding:0}
+.cart .cart-lines li{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px dotted var(--line)}
+.cart .cart-lines li:last-child{border-bottom:0}
+.cart .name{flex:1;min-width:0}
+.cart .name small{display:block;color:var(--muted);font-size:14px;line-height:1.4;font-family:var(--font)}
+.cart .name small:empty{display:none}
+.cart .name .flag{color:var(--maybe);font-weight:600}
+.cart .price{font-weight:700;white-space:nowrap}
+.cart-total{border-top:2px dashed var(--line);margin:12px 0 0;padding-top:12px;font-weight:700;font-size:18px}
+.cart .error{margin-top:12px}
+
 .dish .done{font-family:var(--font);color:var(--muted);margin:13px 0 0}
 .receipt .opt{font-weight:400;color:var(--muted)}
 .src{font-family:var(--font);font-size:13px;color:var(--muted);margin-top:14px}

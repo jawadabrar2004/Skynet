@@ -4,6 +4,8 @@ One website that helps people in Connecticut get food:
 
 - **Landing page** asks "Hungry? What do you want to eat or buy today?" and sends the answer to the SNAP assistant.
 - **SNAP assistant** (`pages/assistant.html`) uses Claude to say what Connecticut SNAP covers, with quantity and size controls. Name a meal, like "I want to make a burger," and it lists the groceries.
+  After each answer it asks "Do you want to add more items, or confirm this list?" and keeps asking until the shopper confirms
+  (with the button, or by typing "confirm"). The confirmed list becomes a **cart** with a price estimate for each item and an estimated total.
 - **Nearby stores** (`pages/map.html`) finds SNAP/EBT stores near you by car, bus, or on foot.
 - **Sign up / Sign in** (top right) with a phone number and a one-time code (demo).
 
@@ -58,7 +60,7 @@ If your key ever appears in a public GitHub repo, GitHub's secret scanning finds
       order.html          (placeholder) pickup/delivery, bill, checkout
 
 ## Updating the SNAP rules
-The rules the AI follows are in `server.js`, in the `RULES` text near the top.
+The rules the AI follows are in `server.js`, in the `RULES` text near the top. Price estimates follow `PRICE_RULES` just below it.
 If Connecticut changes its SNAP rules (for example, bans soda or candy), edit that text and restart.
 
 ## Putting it online later

@@ -40,6 +40,9 @@ if (major < 18) {
 // ---- SNAP rules the AI follows (edit here when rules change) ----
 const RULES = "You are a SNAP (food stamps / EBT) eligibility checker for Connecticut, USA, as of September 2026.\nConnecticut follows federal USDA SNAP rules and has NO state food-restriction waiver, so soda, candy, chips, and energy drinks with a Nutrition Facts label ARE eligible.\n\nNOT eligible with SNAP:\n- Alcoholic beverages (beer, wine, liquor, hard seltzer)\n- Tobacco, cigarettes, vapes, nicotine products\n- Vitamins, medicines, supplements, anything with a \"Supplement Facts\" label (including supplement-labeled energy drinks)\n- Live animals (EXCEPT shellfish, fish removed from water, animals slaughtered before pickup)\n- Foods that are hot at the point of sale (hot deli food, rotisserie chicken kept warm, hot pizza)\n- Food made to be eaten in the store\n- Pet food\n- Non-food items: cleaning supplies, paper products (paper plates, napkins, toilet paper), household supplies, hygiene items (soap, toothpaste, diapers, feminine products), cosmetics, decorations, balloons, candles, gift cards\n\nELIGIBLE: fruits, vegetables, meat, poultry, fish, dairy, bread, cereals, snacks, non-alcoholic drinks, cold prepared foods (cold sandwiches, salads), baby formula and baby food, seeds and plants that grow food, birthday cakes (if non-edible decorations are under 50% of the price), ice, bottled water.\n\nUse \"depends\" only when the answer truly depends on something the shopper must check (e.g. energy drinks: Nutrition Facts vs Supplement Facts label; rotisserie chicken: hot vs cold; protein powder).\n\nDISHES AND MEALS: If the shopper names a dish or meal they want (e.g. \"I want to make a burger\", \"tacos tonight\", \"burger\", \"spaghetti dinner\"), do NOT put the dish itself in eligible. Put it in \"dishes\" instead. A ready-made hot dish can't be bought with SNAP, but its raw ingredients can. For each dish give:\n- \"dish\": the dish name.\n- \"why\": one short sentence, e.g. \"A hot, ready-made burger isn't covered by SNAP, but you can make one with these groceries.\"\n- \"ingredients\": ONLY the core ingredients truly needed to make the classic version. Keep it tight and compact: no optional extras, no side dishes, no cooking equipment, no water, no oil unless essential to the dish. Usually 5 to 10 items. Combine interchangeable choices into ONE item with \"options\" (e.g. {\"item\":\"Cheese\",\"options\":[\"American\",\"Cheddar\",\"Swiss\"]}, {\"item\":\"Condiment\",\"options\":[\"Ketchup\",\"Mustard\",\"Mayonnaise\"]}). Each ingredient has \"item\", \"options\" (array, may be empty), \"option\" (the most common choice, or \"\"), \"qty\", \"sizes\", \"size\", and \"eligible\" (true/false) with a \"reason\" if false.\nExample burger ingredients: Burger buns, Ground beef, Cheese (American/Cheddar/Swiss), Lettuce, Tomato, Onion, Pickles, Condiment (Ketchup/Mustard/Mayonnaise), Salt, Black pepper.\nA message can mix dishes and regular items; handle both.\n\nTask: Read the shopper's message. Split it into individual items (fix spelling, drop quantities into the name, ignore filler words). If the message has no shopping items or dishes, return empty arrays and a short \"note\" asking what they want to buy.\nFor every eligible and depends item, also give:\n- \"qty\": how many the shopper asked for (a whole number, default 1; \"2 bags of chips\" -> 2, item \"Chips\").\n- \"sizes\": 2 to 6 common sizes or package options this product is really sold in at US grocery stores, smallest to largest, using the units shoppers see on shelves (milk: \"1 pint\",\"1 quart\",\"Half gallon\",\"1 gallon\"; ground beef: \"0.5 lb\",\"1 lb\",\"2 lb\",\"3 lb\",\"5 lb\"; eggs: \"6 count\",\"12 count\",\"18 count\",\"24 count\"; bread: \"1 loaf\"; bananas: \"1 lb\",\"2 lb\",\"Bunch (about 3 lb)\"). Use an empty array only if a size makes no sense.\n- \"size\": the size the shopper mentioned, or the most common size. It must be one of \"sizes\".\nReply with ONLY this JSON:\n{\"dishes\":[{\"dish\":\"Burger\",\"why\":\"A hot, ready-made burger isn't covered by SNAP, but you can make one with these groceries.\",\"ingredients\":[{\"item\":\"Burger buns\",\"options\":[],\"option\":\"\",\"qty\":1,\"sizes\":[\"4-pack\",\"8-pack\"],\"size\":\"8-pack\",\"eligible\":true},{\"item\":\"Cheese\",\"options\":[\"American\",\"Cheddar\",\"Swiss\"],\"option\":\"American\",\"qty\":1,\"sizes\":[\"8 oz\",\"16 oz\"],\"size\":\"8 oz\",\"eligible\":true}]}],\"eligible\":[{\"item\":\"Milk\",\"qty\":1,\"sizes\":[\"1 pint\",\"1 quart\",\"Half gallon\",\"1 gallon\"],\"size\":\"1 gallon\"}],\"not_eligible\":[{\"item\":\"Diapers\",\"reason\":\"Hygiene item, not food\"}],\"depends\":[{\"item\":\"Energy drink\",\"reason\":\"Allowed only if it has a Nutrition Facts label\",\"qty\":1,\"sizes\":[\"8.4 oz can\",\"12 oz can\",\"16 oz can\",\"4-pack\"],\"size\":\"16 oz can\"}],\"note\":\"\"}\nKeep reasons under 12 words.";
 
+// ---- Price estimates for a confirmed cart ----
+const PRICE_RULES = "You estimate grocery prices for shoppers in Connecticut, USA, as of September 2026.\nFor each item in the list, give the typical regular shelf price in US dollars for ONE unit of that item at the given size and type, at a typical mid-priced Connecticut supermarket, for a store brand or common brand. Use regular prices, not sale prices. If no size is given, assume the most common package.\nReply with ONLY this JSON, one number per item in the same order as the list, rounded to cents: {\"prices\":[3.49,2.99]}\nUse null only if the item is not something a grocery store sells.";
+
 // ---- Simple rate limit per visitor, to protect your API bill ----
 const hits = new Map();
 function allowed(ip) {
@@ -72,7 +75,7 @@ function parseJSON(text) {
   return null;
 }
 
-async function askClaude(userText) {
+async function callClaude(system, userContent, maxTokens) {
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -82,12 +85,10 @@ async function askClaude(userText) {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 3000,
+      max_tokens: maxTokens,
       temperature: 0,
-      system: RULES,
-      messages: [
-        { role: "user", content: "Shopper's message:\n" + userText + "\n\nReply with only the JSON object." }
-      ]
+      system,
+      messages: [{ role: "user", content: userContent }]
     })
   });
   const body = await r.json().catch(() => ({}));
@@ -102,9 +103,26 @@ async function askClaude(userText) {
   const text = (body.content || []).filter(b => b.type === "text").map(b => b.text).join("");
   const data = parseJSON(text);
   if (!data) throw Object.assign(new Error("Bad JSON from model"), { code: "ai_error" });
+  return data;
+}
+
+async function askClaude(userText) {
+  const data = await callClaude(RULES, "Shopper's message:\n" + userText + "\n\nReply with only the JSON object.", 3000);
   for (const k of ["dishes", "eligible", "not_eligible", "depends"]) if (!Array.isArray(data[k])) data[k] = [];
   if (typeof data.note !== "string") data.note = "";
   return data;
+}
+
+async function askPrices(items) {
+  const list = items.map((x, i) => (i + 1) + ". " + [x.item, x.option, x.size].filter(Boolean).join(", ")).join("\n");
+  const data = await callClaude(PRICE_RULES, "Items:\n" + list + "\n\nReply with only the JSON object.", 1500);
+  const raw = Array.isArray(data.prices) ? data.prices : [];
+  // One price per item; anything that isn't a sensible number becomes null
+  const prices = items.map((_, i) => {
+    const v = Number(raw[i]);
+    return raw[i] != null && isFinite(v) && v > 0 && v < 500 ? Math.round(v * 100) / 100 : null;
+  });
+  return { prices };
 }
 
 // ---- The website ----
@@ -159,6 +177,28 @@ const server = http.createServer(async (req, res) => {
     if (!text) return send(res, 400, { error: "empty" });
     try {
       return send(res, 200, await askClaude(text));
+    } catch (e) {
+      const status = e.code === "rate_limited" ? 429 : 502;
+      return send(res, status, { error: e.code || "ai_error" });
+    }
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/prices") {
+    if (!API_KEY) return send(res, 503, { error: "no_key" });
+    const ip = req.socket.remoteAddress || "unknown";
+    if (!allowed(ip)) return send(res, 429, { error: "rate_limited" });
+    let items = [];
+    try {
+      const raw = JSON.parse(await readBody(req)) || {};
+      items = (Array.isArray(raw.items) ? raw.items : []).slice(0, 60).map(x => ({
+        item: String((x && x.item) || "").trim().slice(0, 100),
+        option: String((x && x.option) || "").trim().slice(0, 60),
+        size: String((x && x.size) || "").trim().slice(0, 60)
+      })).filter(x => x.item);
+    } catch { return send(res, 400, { error: "bad_request" }); }
+    if (!items.length) return send(res, 400, { error: "empty" });
+    try {
+      return send(res, 200, await askPrices(items));
     } catch (e) {
       const status = e.code === "rate_limited" ? 429 : 502;
       return send(res, status, { error: e.code || "ai_error" });
