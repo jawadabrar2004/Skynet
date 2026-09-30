@@ -7,7 +7,7 @@ One website that helps people in Connecticut get food:
   After each answer it asks "Do you want to add more items, or confirm this list?" and keeps asking until the shopper confirms
   (with the button, or by typing "confirm"). The confirmed list becomes a **cart** with a price estimate for each item and an estimated total.
 - **Nearby stores** (`pages/map.html`) finds SNAP/EBT stores near you by car, bus, or on foot.
-- **Sign up / Sign in** (top right) with a phone number and a one-time code (demo).
+- **Sign up / Sign in** (top right) with a phone number and a password.
 
 Plain HTML, CSS, and JavaScript, plus a small Node.js server (`server.js`) that talks to Claude. No build step, no npm install.
 
@@ -41,13 +41,13 @@ If your key ever appears in a public GitHub repo, GitHub's secret scanning finds
 - `MAX_CHECKS_PER_MINUTE` in `config.txt` limits how many checks each visitor can run, to protect your bill.
 
 ## Sign up and sign in
-- Phone number + 6-digit one-time code. No passwords.
-- The server (`server-auth.js`) creates and checks codes: 10-minute expiry, 5 tries, 30 seconds between resends.
+- Phone number + password (at least 6 characters). No text messages or codes.
+- The server (`server-auth.js`) saves only a salted scrypt hash of each password, never the password itself.
+  After 10 wrong passwords for a number within 15 minutes, that number is paused for the rest of the 15 minutes.
+- Signing in with a number that has no account goes straight to Create account, with the number filled in.
 - Accounts go in `data/users.json`; sessions are a secure HttpOnly cookie that lasts 30 days. `data/` is never committed.
-- The order page needs a signed-in account. The map is open to everyone.
+- Confirming an order needs a signed-in account. The map and store are open to everyone.
 - EBT numbers and ID / disability photos are only checked in the browser. They are never sent to the server or saved.
-- **Demo mode** (default): no text is sent; the code is shown on screen and printed in the server window.
-- **Real texts**: add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM` to `config.txt`, then restart.
 
 ## Structure
     index.html            Landing page: the "Hungry?" question, options, how it works

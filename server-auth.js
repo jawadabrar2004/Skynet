@@ -1,7 +1,6 @@
-// CT Food Access Finder - sign up / sign in with a phone number and a one-time code.
+// Doorstep - sign up and sign in with a phone number and a password.
 // Accounts are saved in data/users.json, sessions in data/sessions.json (both kept out of git).
-// Codes are sent by text with Twilio when TWILIO_* settings are in config.txt.
-// Without them the app runs in demo mode: the code is shown on screen and printed in this window.
+// Passwords are never stored: only a salted scrypt hash is saved.
 
 const fs = require("fs");
 const path = require("path");
@@ -13,14 +12,9 @@ const SESSIONS_FILE = path.join(DATA_DIR, "sessions.json");
 
 const COOKIE = "ctfa_session";
 const SESSION_DAYS = 30;
-const CODE_MINUTES = 10;
-const MAX_CODE_TRIES = 5;
-const RESEND_SECONDS = 30;
-
-const TWILIO_SID = (process.env.TWILIO_ACCOUNT_SID || "").trim();
-const TWILIO_TOKEN = (process.env.TWILIO_AUTH_TOKEN || "").trim();
-const TWILIO_FROM = (process.env.TWILIO_FROM || "").trim();
-const SMS_ON = !!(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM);
+const MIN_PASSWORD = 6;
+const MAX_FAILS = 10;           // wrong passwords per phone number...
+const FAIL_MINUTES = 15;        // ...within this many minutes, then that number is paused
 
 // ---- Small JSON file store ----
 function load(file) {
@@ -41,49 +35,21 @@ function sameHash(a, b) {
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 }
 
-// ---- One-time codes (kept in memory; they only live for 10 minutes) ----
-const codes = new Map(); // "signup:8605550123" -> { hash, expires, tries, sentAt, data }
-
-async function sendCode(purpose, phone, data) {
-  const key = purpose + ":" + phone;
-  const old = codes.get(key);
-  const wait = old ? Math.ceil((old.sentAt + RESEND_SECONDS * 1000 - Date.now()) / 1000) : 0;
-  if (wait > 0) return { error: "too_soon", wait };
-
-  const code = String(crypto.randomInt(100000, 1000000));
-  codes.set(key, { hash: sha256(code), expires: Date.now() + CODE_MINUTES * 60000, tries: 0, sentAt: Date.now(), data });
-
-  if (SMS_ON) {
-    const r = await fetch("https://api.twilio.com/2010-04-01/Accounts/" + TWILIO_SID + "/Messages.json", {
-      method: "POST",
-      headers: {
-        "Authorization": "Basic " + Buffer.from(TWILIO_SID + ":" + TWILIO_TOKEN).toString("base64"),
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({ To: "+1" + phone, From: TWILIO_FROM, Body: "Your Food Access Finder code is " + code + ". It expires in " + CODE_MINUTES + " minutes." })
-    }).catch(() => null);
-    if (!r || !r.ok) {
-      codes.delete(key);
-      console.error("Twilio could not send a text" + (r ? " (status " + r.status + ")" : ""));
-      return { error: "sms_failed" };
-    }
-    return { ok: true };
-  }
-  console.log("  [demo] " + purpose + " code for (***) ***-" + phone.slice(6) + ": " + code);
-  return { ok: true, demoCode: code };
+// ---- Passwords ----
+function hashPassword(pw) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  return "scrypt$" + salt + "$" + crypto.scryptSync(String(pw), salt, 64).toString("hex");
 }
-
-function checkCode(purpose, phone, code) {
-  const key = purpose + ":" + phone;
-  const entry = codes.get(key);
-  if (!entry || entry.expires < Date.now()) { codes.delete(key); return { error: "code_expired" }; }
-  if (entry.tries >= MAX_CODE_TRIES) { codes.delete(key); return { error: "too_many_tries" }; }
-  entry.tries++;
-  if (!/^\d{6}$/.test(code) || !sameHash(sha256(code), entry.hash)) {
-    return { error: "wrong_code", left: MAX_CODE_TRIES - entry.tries };
-  }
-  codes.delete(key);
-  return { ok: true, data: entry.data };
+function checkPassword(pw, stored) {
+  const [kind, salt, hash] = String(stored || "").split("$");
+  if (kind !== "scrypt" || !salt || !hash) return false;
+  return sameHash(crypto.scryptSync(String(pw), salt, 64).toString("hex"), hash);
+}
+const fails = new Map(); // phone -> [times of wrong passwords]
+function recentFails(phone) {
+  const list = (fails.get(phone) || []).filter(t => Date.now() - t < FAIL_MINUTES * 60000);
+  fails.set(phone, list);
+  return list;
 }
 
 // ---- Sessions ----
@@ -139,13 +105,16 @@ function checkSignup(b) {
   if (!p.first) errors.firstName = "Enter your first name.";
   if (!p.last) errors.lastName = "Enter your last name.";
   if (!p.phone) errors.phone = "Enter a 10-digit phone number.";
-  else if (users[p.phone]) errors.phone = "An account already exists for this number. Sign in instead.";
+  else if (users[p.phone] && users[p.phone].password) errors.phone = "An account already exists for this number. Sign in instead.";
   if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) errors.email = "Enter a valid email, or leave it blank.";
   if (!(p.age >= 18 && p.age <= 120)) errors.age = "Enter your age (18 or older).";
   if (!["car", "bus", "walk"].includes(p.transport)) errors.transport = "Choose how you usually get around.";
   if (typeof b.disabled !== "boolean") errors.disabled = "Choose Yes or No.";
+  const pw = typeof b.password === "string" ? b.password : "";
+  if (pw.length < MIN_PASSWORD) errors.password = "Use at least " + MIN_PASSWORD + " characters.";
+  else if (pw.length > 128) errors.password = "Use 128 characters or fewer.";
   p.deliveryEligible = p.disabled || p.age >= 60;
-  return { profile: p, errors };
+  return { profile: p, password: pw, errors };
 }
 
 function publicUser(u) {
@@ -172,42 +141,32 @@ async function handleAuth(req, res, url, { send, readBody, allowed }) {
   let b;
   try { b = JSON.parse(await readBody(req, 4000) || "{}") || {}; } catch { send(res, 400, { error: "bad_request" }); return true; }
 
-  if (route === "POST /api/auth/signup/start") {
-    const { profile, errors } = checkSignup(b);
+  if (route === "POST /api/auth/signup") {
+    const { profile, password, errors } = checkSignup(b);
     if (Object.keys(errors).length) { send(res, 400, { error: "invalid", errors }); return true; }
-    const r = await sendCode("signup", profile.phone, profile);
-    send(res, r.ok ? 200 : r.error === "too_soon" ? 429 : 502, { ...r, sms: SMS_ON });
-    return true;
-  }
-
-  if (route === "POST /api/auth/signup/verify") {
-    const phone = normPhone(b.phone);
-    const r = checkCode("signup", phone, String(b.code || ""));
-    if (!r.ok) { send(res, 400, r); return true; }
-    if (users[phone]) { send(res, 409, { error: "exists" }); return true; }
-    users[phone] = { ...r.data, createdAt: new Date().toISOString() };
+    users[profile.phone] = { ...profile, password: hashPassword(password), createdAt: new Date().toISOString() };
     save(USERS_FILE, users);
-    startSession(req, res, phone);
-    send(res, 200, { user: publicUser(users[phone]) });
+    startSession(req, res, profile.phone);
+    send(res, 200, { user: publicUser(users[profile.phone]) });
     return true;
   }
 
-  if (route === "POST /api/auth/login/start") {
+  if (route === "POST /api/auth/login") {
     const phone = normPhone(b.phone);
+    const password = typeof b.password === "string" ? b.password : "";
     if (!phone) { send(res, 400, { error: "invalid", errors: { phone: "Enter your 10-digit phone number." } }); return true; }
-    if (!users[phone]) { send(res, 404, { error: "invalid", errors: { phone: "We could not find an account for this number. Sign up first." } }); return true; }
-    const r = await sendCode("login", phone);
-    send(res, r.ok ? 200 : r.error === "too_soon" ? 429 : 502, { ...r, sms: SMS_ON });
-    return true;
-  }
-
-  if (route === "POST /api/auth/login/verify") {
-    const phone = normPhone(b.phone);
-    const r = checkCode("login", phone, String(b.code || ""));
-    if (!r.ok) { send(res, 400, r); return true; }
-    if (!users[phone]) { send(res, 404, { error: "no_account" }); return true; }
+    const u = users[phone];
+    if (!u || !u.password) { send(res, 404, { error: "no_account" }); return true; }
+    if (!password) { send(res, 400, { error: "invalid", errors: { password: "Enter your password." } }); return true; }
+    if (recentFails(phone).length >= MAX_FAILS) { send(res, 429, { error: "too_many_tries" }); return true; }
+    if (!checkPassword(password, u.password)) {
+      recentFails(phone).push(Date.now());
+      send(res, 401, { error: "invalid", errors: { password: "That password is not right. Try again." } });
+      return true;
+    }
+    fails.delete(phone);
     startSession(req, res, phone);
-    send(res, 200, { user: publicUser(users[phone]) });
+    send(res, 200, { user: publicUser(u) });
     return true;
   }
 
@@ -221,4 +180,4 @@ async function handleAuth(req, res, url, { send, readBody, allowed }) {
   return true;
 }
 
-module.exports = { handleAuth, currentUser, SMS_ON };
+module.exports = { handleAuth, currentUser };

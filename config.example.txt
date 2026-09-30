@@ -14,12 +14,6 @@ MODEL=claude-haiku-4-5-20251001
 PORT=3000
 MAX_CHECKS_PER_MINUTE=20
 
-# Optional: send sign-in codes by text message with Twilio (https://www.twilio.com).
-# Leave these blank to use demo mode, where the code is shown on screen instead.
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_FROM=
-
 # Optional: Google Maps key for the live map, store hours, travel times and directions.
 # Enable Maps JavaScript API, Places API and Routes API, and restrict the key to your site.
 GOOGLE_MAPS_API_KEY=

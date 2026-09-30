@@ -18,7 +18,7 @@
     <div>
       <span class="auth-tag">CONNECTICUT FOOD ACCESS</span>
       <h1>Welcome back to Doorstep.</h1>
-      <p>Sign in with your phone number. We text you a one-time code, so there's no password to remember.</p>
+      <p>Sign in with your phone number and password.</p>
       <ul class="checks">
         <li>Stores ranked for how you travel</li>
         <li>Reorder or track a pickup or delivery</li>
@@ -36,50 +36,31 @@
         <a class="auth-tab" href="signup.html">Create account</a>
       </nav>
 
-      <ol class="stepbar" aria-label="Sign in progress">
-        <li id="sb1" class="current" aria-current="step">Phone number</li>
-        <li id="sb2">Enter code</li>
-      </ol>
 
       <form id="login-form" novalidate>
         <h2>Welcome back</h2>
-        <p class="lede">Enter the phone number you signed up with.</p>
+        <p class="lede">Enter the phone number and password you signed up with.</p>
         <div class="field">
           <label for="phone">Phone number</label>
           <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(860) 555-0123" aria-describedby="phone-error">
           <p class="error" id="phone-error" role="alert"></p>
         </div>
-        <button class="btn btn-navy btn-block" type="submit">Send verification code</button>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-wrap">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" aria-describedby="password-error">
+            <button type="button" class="pw-toggle" aria-controls="password" aria-pressed="false">Show</button>
+          </div>
+          <p class="error" id="password-error" role="alert"></p>
+        </div>
+        <button class="btn btn-navy btn-block" type="submit">Sign in</button>
         <div class="or-divider"><span>or</span></div>
         <a class="btn btn-outline btn-block" id="guest-btn" href="map.html">Continue as guest</a>
         <p class="switch">New to Doorstep? <a href="signup.html">Create an account</a></p>
       </form>
 
-      <section id="verify-panel" hidden>
-        <h2>Enter your code</h2>
-        <p class="lede">We sent a 6-digit code to <strong id="sent-to"></strong>. It expires in 10 minutes.</p>
-        <div class="alert" hidden><strong>Demo mode: no text was sent</strong>Your code is <span class="demo-code" id="demo-code"></span></div>
-        <form id="verify-form" novalidate>
-          <span class="legend" id="otp-label">6-digit code</span>
-          <div class="otp" id="otp" role="group" aria-labelledby="otp-label">
-            <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Digit 1">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
-          </div>
-          <p class="error" id="otp-error" role="alert"></p>
-          <p class="hint" id="otp-status" role="status" aria-live="polite"></p>
-          <div class="form-actions" style="margin-top:18px">
-            <button class="btn btn-navy" type="submit">Verify and sign in</button>
-            <button class="btn btn-outline" type="button" id="resend-btn">Resend code</button>
-          </div>
-          <p class="switch"><button class="link-btn" type="button" id="change-btn">Use a different number</button></p>
-        </form>
-      </section>
 
-      <p class="secure-note"><span aria-hidden="true">🔒</span> We use a one-time code instead of a password. You stay signed in on this device for 30 days, or until you sign out.</p>
+      <p class="secure-note"><span aria-hidden="true">🔒</span> You stay signed in on this device for 30 days, or until you sign out.</p>
     </div>
   </main>
 </div>

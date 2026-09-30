@@ -290,3 +290,9 @@ body.cart-open{overflow:hidden}
 /* Sign in: "or" between the code button and Continue as guest */
 .or-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .or-divider::before,.or-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+/* Password box with a Show / Hide button inside it */
+.pw-wrap{position:relative}
+.pw-wrap .input{padding-right:78px}
+.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);min-height:38px;min-width:60px;padding:0 10px;border:0;border-radius:8px;background:var(--tint);color:var(--navy);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.pw-toggle:hover{background:#dce8fd}
+.pw-toggle:focus-visible{outline:3px solid var(--focus);outline-offset:1px}

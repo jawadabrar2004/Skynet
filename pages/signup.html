@@ -36,10 +36,6 @@
         <a class="auth-tab" href="signup.html" aria-current="page">Create account</a>
       </nav>
 
-      <ol class="stepbar" aria-label="Sign up progress">
-        <li id="sb1" class="current" aria-current="step">Your details</li>
-        <li id="sb2">Verify your phone</li>
-      </ol>
 
       <form id="signup-form" novalidate>
         <h2>Your details</h2>
@@ -63,8 +59,17 @@
           <div class="field">
             <label for="phone">Phone number</label>
             <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(860) 555-0123" aria-describedby="phone-hint phone-error">
-            <p class="hint" id="phone-hint">We text a code to this number. You will use it to sign in.</p>
+            <p class="hint" id="phone-hint">You will sign in with this number and your password.</p>
             <p class="error" id="phone-error" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="pw-wrap">
+              <input class="input" id="password" name="password" type="password" autocomplete="new-password" minlength="6" aria-describedby="password-hint password-error">
+              <button type="button" class="pw-toggle" aria-controls="password" aria-pressed="false">Show</button>
+            </div>
+            <p class="hint" id="password-hint">At least 6 characters.</p>
+            <p class="error" id="password-error" role="alert"></p>
           </div>
           <div class="field">
             <label for="email">Email <span class="opt">(optional)</span></label>
@@ -140,34 +145,10 @@
           <p class="error" id="consent-error" role="alert"></p>
         </div>
 
-        <button class="btn btn-navy btn-block" type="submit">Continue: send verification code</button>
-        <p class="hint" style="margin-top:10px">Next step: enter the 6-digit code to finish signing up.</p>
+        <button class="btn btn-navy btn-block" type="submit">Create account</button>
         <p class="switch">Already have an account? <a href="login.html">Sign in</a></p>
       </form>
 
-      <section id="verify-panel" hidden>
-        <h2>Enter your code</h2>
-        <p class="lede">We sent a 6-digit code to <strong id="sent-to"></strong>. It expires in 10 minutes.</p>
-        <div class="alert" hidden><strong>Demo mode: no text was sent</strong>Your code is <span class="demo-code" id="demo-code"></span></div>
-        <form id="verify-form" novalidate>
-          <span class="legend" id="otp-label">6-digit code</span>
-          <div class="otp" id="otp" role="group" aria-labelledby="otp-label">
-            <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Digit 1">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
-          </div>
-          <p class="error" id="otp-error" role="alert"></p>
-          <p class="hint" id="otp-status" role="status" aria-live="polite"></p>
-          <div class="form-actions" style="margin-top:18px">
-            <button class="btn btn-navy" type="submit">Verify and sign up</button>
-            <button class="btn btn-outline" type="button" id="resend-btn">Resend code</button>
-          </div>
-          <p class="switch"><button class="link-btn" type="button" id="change-btn">Change my details</button></p>
-        </form>
-      </section>
 
       <section id="success-panel" hidden>
         <div class="success">

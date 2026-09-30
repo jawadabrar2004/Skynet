@@ -25,7 +25,7 @@ function loadFile(file) {
 }
 loadEnv();
 
-const { handleAuth, currentUser, SMS_ON } = require("./server-auth");
+const { handleAuth, currentUser } = require("./server-auth");
 
 const API_KEY = (process.env.ANTHROPIC_API_KEY || "").trim();
 const MAPS_KEY = (process.env.GOOGLE_MAPS_API_KEY || "").trim();
@@ -263,7 +263,5 @@ server.listen(PORT, () => {
     console.log("  Keep this window open while you use the site. Press Ctrl+C to stop.\n");
   }
   console.log(MAPS_KEY ? "  Google Maps is ON.\n" : "  Google Maps is OFF. Add GOOGLE_MAPS_API_KEY to config.txt for the live map.\n");
-  console.log(SMS_ON ? "  Sign-in codes are sent by text message (Twilio).\n"
-                     : "  Sign-in codes are in DEMO mode: shown on screen and printed here. Add TWILIO_* to config.txt to send real texts.\n");
 });
 // End of server.js
