@@ -5,6 +5,7 @@ if ! command -v node >/dev/null 2>&1; then
   read -p "Press Enter to close."
   exit 1
 fi
+[ -f config.txt ] || cp config.example.txt config.txt
 if ! grep -q "^ANTHROPIC_API_KEY=sk-" config.txt 2>/dev/null; then
   echo "Your API key is not in config.txt yet."
   echo "TextEdit will open. Paste your key after ANTHROPIC_API_KEY= , save, then run this again."

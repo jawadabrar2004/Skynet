@@ -1,0 +1,3 @@
+# Your real settings (API key). Never commit these.
+config.txt
+.env
