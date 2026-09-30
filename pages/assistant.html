@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0918">
   <title>SNAP assistant - CT Food Access Finder</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="../css/assistant.css">
 </head>
-<body>
+<body class="theme-ai">
 <a class="skip-link" href="#main">Skip to main content</a>
 <div class="utility"><div class="wrap">
   <span class="u-left"><b>Prototype.</b> Student project, not an official State of Connecticut website.</span>
@@ -42,9 +43,11 @@
 </header>
 <main id="main" class="wrap snap">
   <div class="snap-intro">
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>SNAP assistant</p>
     <h1>Hungry? What do you want to eat or buy today?</h1>
     <p>Tell me what you want to buy, and I’ll sort it into what your Connecticut SNAP benefits cover and what they don’t.</p>
-    <p>Type it however you like, for example “milk, 2 bags of chips, dog food, and a hot pizza from the deli.” You can also name a meal, like “I want to make a burger,” and I’ll list the groceries to make it.</p>
+    <p>You can type in 2 bags of milk, bags of chips, butter, tissue paper.</p>
+    <p>You can also name a meal, like “I want to make a burger,” and I’ll list the groceries to make it.</p>
     <div class="examples" aria-label="Try an example">
       <button type="button" data-ex="eggs, bread, bananas, soda, diapers, dish soap">Weekly groceries</button>
       <button type="button" data-ex="birthday cake, candles, balloons, ice cream, juice boxes, paper plates">Birthday party</button>

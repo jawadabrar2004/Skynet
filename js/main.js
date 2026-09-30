@@ -48,6 +48,7 @@
       window.location.href = location.pathname.indexOf('/pages/') !== -1 ? '../index.html' : 'index.html';
     });
     links.appendChild(hi); links.appendChild(mapLink); links.appendChild(out);
+    document.body.classList.add('signed-in');
     initCart();
 
     // On the landing page, signed-in users should resume at the map instead of being asked to sign in again.
