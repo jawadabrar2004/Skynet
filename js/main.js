@@ -24,53 +24,31 @@
     el.addEventListener('click', function () { say(el.getAttribute('data-toast')); });
   });
 
-  // Persist demo sign-in across reloads and browser restarts.
-  // A session is considered valid only if its phone still belongs to a saved demo user.
+  // Signed-in header. The server keeps the session in a secure cookie; /api/auth/me says who is signed in.
   var links = document.getElementById('auth-links');
-  var session = null, users = {};
-  try {
-    session = JSON.parse(localStorage.getItem('ctfa_session') || 'null');
-    users = JSON.parse(localStorage.getItem('ctfa_users') || '{}') || {};
-    if (!session || !session.phone || !users[session.phone]) session = null;
-  } catch (e) { session = null; users = {}; }
+  var inPages = location.pathname.indexOf('/pages/') !== -1;
+  if (!links || location.protocol === 'file:') return;
 
-  if (links && session) {
-    var first = session.first || (users[session.phone] && users[session.phone].first) || '';
+  fetch('/api/auth/me', { credentials: 'same-origin' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { if (d && d.user) showSignedIn(d.user); })
+    .catch(function () {});
+
+  function showSignedIn(user) {
     links.textContent = '';
-    var hi = document.createElement('span'); hi.className = 'hello'; hi.textContent = first ? 'Hi, ' + first : 'Signed in';
+    var hi = document.createElement('span'); hi.className = 'hello'; hi.textContent = 'Hi, ' + user.first;
     var mapLink = document.createElement('a');
     mapLink.className = 'btn btn-outline btn-sm';
     mapLink.textContent = 'Nearby stores';
-    mapLink.href = location.pathname.indexOf('/pages/') !== -1 ? 'map.html' : 'pages/map.html';
+    mapLink.href = inPages ? 'map.html' : 'pages/map.html';
     var out = document.createElement('button'); out.type = 'button'; out.className = 'link-btn'; out.textContent = 'Sign out';
     out.addEventListener('click', function () {
-      try { localStorage.removeItem('ctfa_session'); } catch (e) {}
-      window.location.href = location.pathname.indexOf('/pages/') !== -1 ? '../index.html' : 'index.html';
+      fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', credentials: 'same-origin' })
+        .finally(function () { window.location.href = inPages ? '../index.html' : 'index.html'; });
     });
     links.appendChild(hi); links.appendChild(mapLink); links.appendChild(out);
     document.body.classList.add('signed-in');
     initCart();
-
-    // On the landing page, signed-in users should resume at the map instead of being asked to sign in again.
-    if (location.pathname.endsWith('/') || location.pathname.endsWith('/index.html') || location.pathname === 'index.html') {
-      // Use one clear primary continuation action in the hero.
-      var start = document.querySelector('.hero-actions a[href="#start"]');
-      if (start) {
-        start.href = 'pages/map.html';
-        start.textContent = 'Continue to nearby stores';
-      }
-
-      // The hero's old Sign in button is redundant once a session exists, so hide it
-      // instead of creating a second identical "Continue" button beside the first.
-      var heroSignIn = document.querySelector('.hero-actions a[href="pages/login.html"]');
-      if (heroSignIn) heroSignIn.style.display = 'none';
-
-      // In the account/search card, replace Sign up with the appropriate signed-in action.
-      Array.prototype.forEach.call(document.querySelectorAll('.choice a[href="pages/signup.html"]'), function (a) {
-        a.href = 'pages/map.html';
-        a.textContent = 'Continue to nearby stores';
-      });
-    }
   }
 
   // Cart (signed-in only): an icon at the top right opens a side panel listing the cart

@@ -1,4 +1,4 @@
-# CT Food Access Finder
+# Doorstep
 
 One website that helps people in Connecticut get food:
 
@@ -28,7 +28,7 @@ Then open **http://localhost:3000**. Keep the Terminal window open while you use
 If the page says a port is already in use (`EADDRINUSE`), an older copy is still running. Close its window, or on a Mac run `lsof -ti :3000 | xargs kill`.
 
 You'll know the AI is working when the assistant's receipts **don't** show "Quick check by keyword matching."
-Opening `index.html` directly (without the server) still works for browsing, but the assistant falls back to that keyword check.
+Opening `index.html` directly (without the server) still works for browsing, but the assistant falls back to that keyword check and sign up / sign in will not work.
 
 ## Keep your Claude key safe (and working)
 
@@ -37,8 +37,17 @@ If your key ever appears in a public GitHub repo, GitHub's secret scanning finds
 - Your key goes **only** in `config.txt`. The repo has `config.example.txt` instead, a blank template.
 - `config.txt` is listed in `.gitignore`, so `git push` and GitHub Desktop skip it.
 - **GitHub's "Add files via upload" page ignores `.gitignore`.** Never drag `config.txt` (or the whole folder) onto it.
-- The key stays on the server. The server only sends the site's own files (`index.html`, `css/`, `js/`, `pages/`, `assets/`) to browsers, never `config.txt`.
+- The key stays on the server. The server only sends the site's own files (`index.html`, `css/`, `js/`, `pages/`, `assets/`) to browsers, never `config.txt` or the saved accounts in `data/`.
 - `MAX_CHECKS_PER_MINUTE` in `config.txt` limits how many checks each visitor can run, to protect your bill.
+
+## Sign up and sign in
+- Phone number + 6-digit one-time code. No passwords.
+- The server (`server-auth.js`) creates and checks codes: 10-minute expiry, 5 tries, 30 seconds between resends.
+- Accounts go in `data/users.json`; sessions are a secure HttpOnly cookie that lasts 30 days. `data/` is never committed.
+- The order page needs a signed-in account. The map is open to everyone.
+- EBT numbers and ID / disability photos are only checked in the browser. They are never sent to the server or saved.
+- **Demo mode** (default): no text is sent; the code is shown on screen and printed in the server window.
+- **Real texts**: add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM` to `config.txt`, then restart.
 
 ## Structure
     index.html            Landing page: the "Hungry?" question, options, how it works
@@ -70,9 +79,6 @@ Upload the folder to a host that runs Node.js (for example Render, Railway, or a
 ## Banner photo
 Save a real photo of people (landscape, about 1200x900, under 400 KB) as `assets/hero.jpg`. It is used on the landing page and the sign up / sign in pages. It fills the hero panel behind the sample results card. Until it exists, the panel shows a soft blue, green and gold background, so the page still looks finished. Use photos you have the right to use: your own, ones with permission, or free-license sites such as unsplash.com and pexels.com (search: "community food market", "senior grocery shopping", "food pantry volunteers").
 
-## Demo OTP
-No SMS is sent. The 6-digit code is displayed on screen. The browser only keeps first name, phone, age, and delivery eligibility (localStorage). EBT numbers and photos are never stored.
-For a real launch: use an SMS provider (Twilio Verify or Firebase Auth), a secure backend for uploads, and real EBT/ID/disability verification.
 
 ## Breakpoints
 1000px (auth pages stack), 820px (mobile menu, one column), 560px (small phones)

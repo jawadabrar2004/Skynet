@@ -1,4 +1,4 @@
-// CT SNAP Checker - local server
+// Doorstep - local server (website, sign-in, and the SNAP assistant)
 // Serves the website and safely talks to the Claude API.
 // Needs Node.js 18 or newer. No npm install required.
 
@@ -25,7 +25,10 @@ function loadFile(file) {
 }
 loadEnv();
 
+const { handleAuth, currentUser, SMS_ON } = require("./server-auth");
+
 const API_KEY = (process.env.ANTHROPIC_API_KEY || "").trim();
+const MAPS_KEY = (process.env.GOOGLE_MAPS_API_KEY || "").trim();
 const MODEL = process.env.MODEL || "claude-haiku-4-5-20251001";
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const MAX_PER_MINUTE = parseInt(process.env.MAX_CHECKS_PER_MINUTE || "20", 10);
@@ -44,14 +47,18 @@ const RULES = "You are a SNAP (food stamps / EBT) eligibility checker for Connec
 const PRICE_RULES = "You estimate grocery prices for shoppers in Connecticut, USA, as of September 2026.\nFor each item in the list, give the typical regular shelf price in US dollars for ONE unit of that item at the given size and type, at a typical mid-priced Connecticut supermarket, for a store brand or common brand. Use regular prices, not sale prices. If no size is given, assume the most common package.\nReply with ONLY this JSON, one number per item in the same order as the list, rounded to cents: {\"prices\":[3.49,2.99]}\nUse null only if the item is not something a grocery store sells.";
 
 // ---- Simple rate limit per visitor, to protect your API bill ----
-const hits = new Map();
-function allowed(ip) {
-  const now = Date.now();
-  const list = (hits.get(ip) || []).filter(t => now - t < 60000);
-  if (list.length >= MAX_PER_MINUTE) { hits.set(ip, list); return false; }
-  list.push(now); hits.set(ip, list);
-  return true;
+function limiter(maxPerMinute) {
+  const hits = new Map();
+  return function allowed(ip) {
+    const now = Date.now();
+    const list = (hits.get(ip) || []).filter(t => now - t < 60000);
+    if (list.length >= maxPerMinute) { hits.set(ip, list); return false; }
+    list.push(now); hits.set(ip, list);
+    return true;
+  };
 }
+const allowed = limiter(MAX_PER_MINUTE);
+const authAllowed = limiter(15);
 
 function send(res, status, obj) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
@@ -127,8 +134,10 @@ async function askPrices(items) {
 
 // ---- The website ----
 // Only the site's own files are served: index.html plus the css, js, pages and assets folders.
-// Everything else (config.txt with your key, server.js, .env) is never sent to the browser.
+// Everything else (config.txt with your key, server.js, .env, data/ with accounts) is never sent to the browser.
 const SITE_DIRS = ["css", "js", "pages", "assets"];
+// Pages that need an account. Signed-out visitors are sent to the sign-in page.
+const SIGNED_IN_PAGES = ["/pages/order.html"];
 const TYPES = {
   ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
@@ -151,14 +160,34 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost");
 
   if (req.method === "GET" || req.method === "HEAD") {
+    // Pages that need an account send signed-out visitors to the sign-in page.
+    if (SIGNED_IN_PAGES.includes(url.pathname) && !currentUser(req)) {
+      res.writeHead(302, { Location: "/pages/login.html", "Cache-Control": "no-store" });
+      return res.end();
+    }
+    // The Google Maps key lives in config.txt (kept out of git) and is added to js/config.js when it is sent.
+    if (url.pathname === "/js/config.js" && MAPS_KEY) {
+      return fs.readFile(path.join(__dirname, "js", "config.js"), "utf8", (err, text) => {
+        if (err) { res.writeHead(404, { "Content-Type": "text/plain" }); return res.end("Not found"); }
+        res.writeHead(200, { "Content-Type": TYPES[".js"], "Cache-Control": "no-store" });
+        res.end(req.method === "HEAD" ? undefined : text.replace(/GOOGLE_MAPS_API_KEY:\s*""/, "GOOGLE_MAPS_API_KEY: " + JSON.stringify(MAPS_KEY)));
+      });
+    }
     const file = siteFile(url.pathname);
     if (file) {
       return fs.readFile(file, (err, buf) => {
         if (err) { res.writeHead(404, { "Content-Type": "text/plain" }); return res.end("Not found"); }
-        res.writeHead(200, { "Content-Type": TYPES[path.extname(file).toLowerCase()], "Cache-Control": "no-cache" });
+        res.writeHead(200, { "Content-Type": TYPES[path.extname(file).toLowerCase()], "Cache-Control": "no-cache", "X-Content-Type-Options": "nosniff" });
         res.end(req.method === "HEAD" ? undefined : buf);
       });
     }
+  }
+
+  try {
+    if (await handleAuth(req, res, url, { send, readBody, allowed: authAllowed })) return;
+  } catch (e) {
+    console.error("Sign-in error:", e.message);
+    return send(res, 500, { error: "server_error" });
   }
 
   if (req.method === "GET" && url.pathname === "/api/health") {
@@ -210,7 +239,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log("\n  CT SNAP Checker is running.");
+  console.log("\n  Doorstep is running.");
   console.log("  Open this in your browser:  http://localhost:" + PORT + "\n");
   if (!API_KEY) {
     console.log("  WARNING: No API key found. The AI is OFF and the page will use the basic keyword check.");
@@ -219,5 +248,8 @@ server.listen(PORT, () => {
     console.log("  AI is ON (model: " + MODEL + ").");
     console.log("  Keep this window open while you use the site. Press Ctrl+C to stop.\n");
   }
+  console.log(MAPS_KEY ? "  Google Maps is ON.\n" : "  Google Maps is OFF. Add GOOGLE_MAPS_API_KEY to config.txt for the live map.\n");
+  console.log(SMS_ON ? "  Sign-in codes are sent by text message (Twilio).\n"
+                     : "  Sign-in codes are in DEMO mode: shown on screen and printed here. Add TWILIO_* to config.txt to send real texts.\n");
 });
 // End of server.js

@@ -3,63 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Sign up - CT Food Access Finder</title>
+  <title>Create account - Doorstep</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body>
+<body class="auth-body">
 <a class="skip-link" href="#main">Skip to main content</a>
-<div class="utility"><div class="wrap">
-  <span class="u-left"><b>Prototype.</b> Student project, not an official State of Connecticut website.</span>
-  <span class="u-right"><a href="tel:211">Need food now? Call 211</a><button type="button" data-toast="Language options will be added in a later version.">Espa&ntilde;ol</button></span>
-</div></div>
-<header class="site-header">
-  <div class="wrap header-row">
-    <a class="brand" href="../index.html" aria-label="Food Access Finder home">
-      <img src="../assets/logo.svg" alt="" width="40" height="46">
-      <span class="brand-text"><small>Connecticut Food Access</small><strong>Food Access Finder</strong></span>
-    </a>
-    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="header-menu">Menu</button>
-    <div class="header-menu" id="header-menu">
-      <nav class="main-nav" aria-label="Main">
-        <ul>
-          <li><a href="../index.html">Home</a></li>
-          <li><a href="../index.html#how">How it works</a></li>
-          <li><a href="../index.html#travel">Ways to travel</a></li>
-          <li><a href="../index.html#help">Help</a></li>
-        </ul>
-      </nav>
-      <div class="auth-links" id="auth-links">
-        <a class="btn btn-outline btn-sm" href="../pages/login.html">Sign in</a>
-        <a class="btn btn-gold btn-sm" href="../pages/signup.html">Sign up</a>
-      </div>
-    </div>
-  </div>
-</header>
-<main id="main" class="auth">
-  <aside class="auth-aside">
+<div class="auth-layout">
+  <aside class="auth-banner">
+    <a class="brand" href="../index.html" aria-label="Doorstep home"><img src="../assets/CTDoorstep_Logo.png" alt="Doorstep" width="144" height="36"></a>
     <div>
-      <h1>Create your account</h1>
+      <span class="auth-tag">CONNECTICUT FOOD ACCESS</span>
+      <h1>Food resources that work with your real life.</h1>
       <p>One account for the map, your orders, and pickup or delivery.</p>
       <ul class="checks">
-        <li>Stores ranked by how you travel</li>
-        <li>Pickup times that fit your schedule</li>
+        <li>Nearby SNAP/EBT stores and pantries</li>
+        <li>Ranked by how you travel</li>
         <li>Delivery for seniors and people with disabilities</li>
       </ul>
     </div>
   </aside>
 
-  <div class="auth-main">
+  <main id="main" class="auth-panel">
     <div class="auth-card">
+      <a class="brand auth-mobile-brand" href="../index.html" aria-label="Doorstep home"><img src="../assets/CTDoorstep_Logo.png" alt="Doorstep" width="144" height="36"></a>
+      <a class="back-link" href="../index.html">← Back to Doorstep</a>
+      <nav class="auth-tabs" aria-label="Account">
+        <a class="auth-tab" href="login.html">Sign in</a>
+        <a class="auth-tab" href="signup.html" aria-current="page">Create account</a>
+      </nav>
+
       <ol class="stepbar" aria-label="Sign up progress">
         <li id="sb1" class="current" aria-current="step">Your details</li>
         <li id="sb2">Verify your phone</li>
       </ol>
-
-      <div class="alert"><strong>Demo mode</strong>No text message is sent and nothing you enter is saved or verified. The code appears on screen so you can test the flow.</div>
 
       <form id="signup-form" novalidate>
         <h2>Your details</h2>
@@ -114,7 +94,7 @@
           <div class="field">
             <label for="ebt">EBT card number</label>
             <input class="input" id="ebt" name="ebt" type="text" inputmode="numeric" autocomplete="off" placeholder="0000 0000 0000 0000" aria-describedby="ebt-hint ebt-error">
-            <p class="hint" id="ebt-hint">16 digits on the front of your card. We do not check it yet.</p>
+            <p class="hint" id="ebt-hint">16 digits on the front of your card. It is only checked on this page and is never sent or saved.</p>
             <p class="error" id="ebt-error" role="alert"></p>
           </div>
           <div class="field" role="radiogroup" aria-labelledby="dis-legend">
@@ -154,22 +134,20 @@
         <div class="field">
           <label class="check" for="consent" style="font-weight:500">
             <input type="checkbox" id="consent" aria-describedby="consent-error">
-            <span>I confirm the information above is mine and true. I understand this is a prototype and my details are not verified yet.</span>
+            <span>I confirm the information above is mine and true. I understand this is a prototype: my name, phone, email, age and travel choice are saved to sign me in, and my EBT number and photos are not saved.</span>
           </label>
           <p class="error" id="consent-error" role="alert"></p>
         </div>
 
-        <div class="form-actions">
-          <button class="btn btn-navy" type="submit">Continue: send verification code</button>
-        </div>
+        <button class="btn btn-navy btn-block" type="submit">Continue: send verification code</button>
         <p class="hint" style="margin-top:10px">Next step: enter the 6-digit code to finish signing up.</p>
         <p class="switch">Already have an account? <a href="login.html">Sign in</a></p>
       </form>
 
-      <section id="verify-panel" hidden style="padding:0">
+      <section id="verify-panel" hidden>
         <h2>Enter your code</h2>
-        <p class="lede">We sent a 6-digit code to <strong id="sent-to"></strong>.</p>
-        <div class="alert"><strong>Demo code</strong><span class="demo-code" id="demo-code"></span></div>
+        <p class="lede">We sent a 6-digit code to <strong id="sent-to"></strong>. It expires in 10 minutes.</p>
+        <div class="alert" hidden><strong>Demo mode: no text was sent</strong>Your code is <span class="demo-code" id="demo-code"></span></div>
         <form id="verify-form" novalidate>
           <span class="legend" id="otp-label">6-digit code</span>
           <div class="otp" id="otp" role="group" aria-labelledby="otp-label">
@@ -190,25 +168,18 @@
         </form>
       </section>
 
-      <section id="success-panel" hidden style="padding:0">
+      <section id="success-panel" hidden>
         <div class="success">
           <div class="tick" aria-hidden="true"></div>
           <h2 id="welcome-name" tabindex="-1">Welcome</h2>
           <p>Your account is ready. <span id="delivery-note"></span></p>
-          <a class="btn btn-gold" href="map.html">Find stores near me</a>
+          <a class="btn btn-navy" href="map.html">Find stores near me</a>
         </div>
       </section>
+      <p class="privacy-copy">Your information is used only to provide food-access services in this prototype.</p>
     </div>
-  </div>
-</main>
-<footer class="site-footer">
-  <div class="wrap footer-grid">
-    <div><h4>Food Access Finder</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
-    <div><h4>Data we use</h4><ul><li>Foodshare service areas</li><li>USDA Food Access Research Atlas</li><li>CTtransit GTFS routes</li><li>Public pantry directories</li></ul></div>
-    <div><h4>Links</h4><ul><li><a href="../pages/signup.html">Sign up</a></li><li><a href="../pages/login.html">Sign in</a></li><li><a href="../index.html#how">How it works</a></li></ul></div>
-    <p class="footer-fine">Prototype for demonstration only. Store hours and stock may change; confirm before you travel.</p>
-  </div>
-</footer>
+  </main>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../js/main.js"></script>
 <script src="../js/auth.js"></script>

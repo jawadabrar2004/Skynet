@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Nearby SNAP/EBT stores - CT Food Access Finder</title>
+  <title>Nearby SNAP/EBT stores - Doorstep</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,15 +13,10 @@
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
-<div class="utility"><div class="wrap">
-  <span class="u-left"><b>Prototype.</b> Student project, not an official State of Connecticut website.</span>
-  <span class="u-right"><a href="tel:211">Need food now? Call 211</a><button type="button" data-toast="Language options will be added in a later version.">Espa&ntilde;ol</button></span>
-</div></div>
 <header class="site-header">
   <div class="wrap header-row">
-    <a class="brand" href="../index.html" aria-label="Food Access Finder home">
-      <img src="../assets/logo.svg" alt="" width="40" height="46">
-      <span class="brand-text"><small>Connecticut Food Access</small><strong>Food Access Finder</strong></span>
+    <a class="brand" href="../index.html" aria-label="Doorstep home">
+      <img src="../assets/CTDoorstep_Logo.png" alt="Doorstep" width="176" height="44">
     </a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="header-menu">Menu</button>
     <div class="header-menu" id="header-menu">
@@ -32,7 +27,7 @@
       </nav>
       <div class="auth-links" id="auth-links">
         <a class="btn btn-outline btn-sm" href="login.html">Sign in</a>
-        <a class="btn btn-gold btn-sm" href="signup.html">Sign up</a>
+        <a class="btn btn-navy btn-sm" href="signup.html">Sign up</a>
       </div>
     </div>
   </div>
@@ -85,7 +80,7 @@
         <div class="fallback-grid" aria-hidden="true"></div>
         <div class="fallback-message">
           <strong>Google Maps is ready to connect.</strong>
-          <span>Add your Maps JavaScript API key in <code>js/config.js</code> to load the live Google map, Places hours, and route times.</span>
+          <span>Add GOOGLE_MAPS_API_KEY to <code>config.txt</code> and restart the server to load the live Google map, Places hours, and route times.</span>
         </div>
       </div>
       <button id="recenter-btn" class="map-control recenter" type="button" aria-label="Recenter map on my location">◎</button>
@@ -108,7 +103,7 @@
 
 <footer class="site-footer map-footer">
   <div class="wrap footer-grid">
-    <div><h4>Food Access Finder</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
+    <div><h4>Doorstep</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
     <div><h4>Data we use</h4><ul><li>USDA SNAP retailer data</li><li>Google Maps Platform</li><li>CTtransit routes</li><li>Public pantry directories</li></ul></div>
     <div><h4>Links</h4><ul><li><a href="signup.html">Sign up</a></li><li><a href="login.html">Sign in</a></li><li><a href="../index.html#how">How it works</a></li></ul></div>
     <p class="footer-fine">Prototype for demonstration only. Store hours and stock may change; confirm before you travel.</p>
