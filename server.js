@@ -8,10 +8,6 @@ const path = require("path");
 
 // ---- Load settings from config.txt ----
 function loadEnv() {
-  // First run: create config.txt from the blank template (config.txt is kept out of git)
-  const config = path.join(__dirname, "config.txt");
-  const example = path.join(__dirname, "config.example.txt");
-  if (!fs.existsSync(config) && fs.existsSync(example)) fs.copyFileSync(example, config);
   // Reads settings from config.txt (easy to find) or .env (hidden on most computers)
   for (const name of ["config.txt", ".env"]) {
     const file = path.join(__dirname, name);
@@ -111,9 +107,7 @@ async function askClaude(userText) {
   return data;
 }
 
-// The website: public/index.html, or index.html next to server.js if that's where it was put
-const INDEX = [path.join(__dirname, "public", "index.html"), path.join(__dirname, "index.html")]
-  .find(f => fs.existsSync(f)) || path.join(__dirname, "public", "index.html");
+const INDEX = path.join(__dirname, "public", "index.html");
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost");
@@ -164,5 +158,5 @@ server.listen(PORT, () => {
     console.log("  Keep this window open while you use the site. Press Ctrl+C to stop.\n");
   }
 });
-
+Highlight
 // End of server.js
