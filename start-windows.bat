@@ -6,6 +6,7 @@ if errorlevel 1 (
   pause
   exit /b
 )
+if not exist config.txt copy config.example.txt config.txt >nul
 findstr /R /C:"^ANTHROPIC_API_KEY=sk-" config.txt >nul 2>nul
 if errorlevel 1 (
   echo Your API key is not in config.txt yet.

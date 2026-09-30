@@ -1,0 +1,15 @@
+# ===== CT SNAP Checker settings (template) =====
+# This is a blank template that is safe to put on GitHub.
+# Your real settings go in config.txt, which is created from this file the first time
+# you run the app. config.txt is ignored by git, so your key stays on your computer.
+#
+# Paste your Claude API key after the = sign below, then save this file.
+# Example:  ANTHROPIC_API_KEY=sk-ant-abc123...
+# (No spaces, no quotes.)
+
+ANTHROPIC_API_KEY=
+
+# Optional settings (you can leave these as they are)
+MODEL=claude-haiku-4-5-20251001
+PORT=3000
+MAX_CHECKS_PER_MINUTE=20
