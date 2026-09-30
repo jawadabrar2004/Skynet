@@ -54,6 +54,21 @@
     </form>
   </div>
 
+  <section class="shelves" id="shelves" aria-labelledby="shelves-title">
+    <div class="shelves-head">
+      <h2 id="shelves-title">Or shop by category</h2>
+      <p>Everything here can be bought with SNAP. Prices are typical estimates.</p>
+    </div>
+    <div class="shelf-tabs" id="shelf-tabs" role="tablist" aria-label="Categories"></div>
+    <div class="shelf-grid" id="shelf-grid" role="tabpanel"></div>
+    <div class="shelf-bar" id="shelf-bar" hidden>
+      <span id="shelf-count">0 items in your list</span>
+      <button class="btn btn-orange" id="shelf-confirm" type="button">Confirm order</button>
+    </div>
+  </section>
+
+  <dialog class="order-dialog" id="order-dialog" aria-labelledby="order-title"></dialog>
+
   <div class="notice">
     <p>Based on federal USDA SNAP rules as of September 2026. Connecticut has no extra soda or candy ban. Rules can change, so check <a href="https://portal.ct.gov/dss" target="_blank" rel="noopener">CT DSS</a> for official updates. Want to know where to shop? <a href="map.html">Find SNAP/EBT stores near you</a>.</p>
   </div>
