@@ -141,6 +141,20 @@
     els.recenter.hidden = true;
   }
 
+  // Google calls this when it rejects the API key (billing off, an API not enabled, or a
+  // website restriction that doesn't include this address). Show the store list without the map
+  // instead of Google's grey "Something went wrong" box.
+  window.gm_authFailure = () => {
+    state.googleReady = false;
+    showFallbackMap();
+    const msg = els.fallback.querySelector('.fallback-message');
+    if (msg) {
+      msg.querySelector('strong').textContent = 'Google Maps turned down the API key.';
+      msg.querySelector('span').textContent = 'The SNAP store list still works. To fix the map, check the key in Google Cloud: billing turned on, Maps JavaScript API enabled, and this website address allowed.';
+    }
+    toast('Google Maps is not available right now. The SNAP store list still works.');
+  };
+
   function loadGoogleMaps() {
     if (window.google?.maps) return Promise.resolve();
     return new Promise((resolve, reject) => {
