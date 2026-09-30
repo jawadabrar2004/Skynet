@@ -58,6 +58,15 @@ function limiter(maxPerMinute) {
   };
 }
 const allowed = limiter(MAX_PER_MINUTE);
+
+// The visitor's address, for the limits above. Through a tunnel (cloudflared) every visitor
+// arrives from this laptop itself, so use the address the tunnel passes along instead.
+function clientIp(req) {
+  const direct = req.socket.remoteAddress || "unknown";
+  if (!/^(::1|127\.|::ffff:127\.)/.test(direct)) return direct;
+  const fwd = req.headers["cf-connecting-ip"] || String(req.headers["x-forwarded-for"] || "").split(",")[0];
+  return String(fwd || direct).trim().slice(0, 64);
+}
 const authAllowed = limiter(15);
 
 function send(res, status, obj) {
@@ -184,7 +193,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
-    if (await handleAuth(req, res, url, { send, readBody, allowed: authAllowed })) return;
+    if (await handleAuth(req, res, url, { send, readBody, allowed: () => authAllowed(clientIp(req)) })) return;
   } catch (e) {
     console.error("Sign-in error:", e.message);
     return send(res, 500, { error: "server_error" });
@@ -196,7 +205,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/check") {
     if (!API_KEY) return send(res, 503, { error: "no_key" });
-    const ip = req.socket.remoteAddress || "unknown";
+    const ip = clientIp(req);
     if (!allowed(ip)) return send(res, 429, { error: "rate_limited" });
     let text = "";
     try {
@@ -214,7 +223,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/prices") {
     if (!API_KEY) return send(res, 503, { error: "no_key" });
-    const ip = req.socket.remoteAddress || "unknown";
+    const ip = clientIp(req);
     if (!allowed(ip)) return send(res, 429, { error: "rate_limited" });
     let items = [];
     try {
