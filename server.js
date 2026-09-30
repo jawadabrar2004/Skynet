@@ -117,7 +117,7 @@ async function askClaude(userText) {
 // The SNAP checker page lives at /snap. The Food Access Finder site is served from this folder.
 const SNAP_PAGE = path.join(__dirname, "public", "index.html");
 const PUBLIC_DIRS = ["css", "js", "pages", "assets"];
-const SIGNED_IN_PAGES = ["/pages/map.html", "/pages/order.html"];
+const SIGNED_IN_PAGES = ["/pages/order.html"];
 const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon" };
 

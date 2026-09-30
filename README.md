@@ -10,7 +10,7 @@ Sign up and sign in need this server; opening `index.html` directly as a file wi
 - Phone number + 6-digit one-time code. No passwords.
 - The server (`server-auth.js`) creates and checks codes: 10-minute expiry, 5 tries, 30 seconds between resends.
 - Accounts go in `data/users.json`; sessions are a secure HttpOnly cookie that lasts 30 days. `data/` is never committed.
-- The map and order pages need a signed-in account.
+- The order page needs a signed-in account. The map is open to everyone.
 - EBT numbers and ID / disability photos are only checked in the browser. They are never sent to the server or saved.
 - **Demo mode** (default): no text is sent; the code is shown on screen and printed in the server window.
 - **Real texts**: add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM` to `config.txt`, then restart.

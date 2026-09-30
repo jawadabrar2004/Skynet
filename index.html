@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Doorstep - Find food you can actually reach</title>
+  <title>Doorstep - More access, less hassle</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,13 +19,6 @@
     </a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="header-menu">Menu</button>
     <div class="header-menu" id="header-menu">
-      <nav class="main-nav" aria-label="Main">
-        <ul>
-          <li><a href="#how">How it works</a></li>
-          <li><a href="#resources">Resources</a></li>
-          <li><a href="#about">About</a></li>
-        </ul>
-      </nav>
       <div class="auth-links" id="auth-links">
         <a class="btn btn-outline btn-sm" href="pages/login.html">Sign in</a>
         <a class="btn btn-navy btn-sm" href="pages/signup.html">Sign up</a>
@@ -35,83 +28,33 @@
 </header>
 
 <main id="main">
-  <section class="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <p class="eyebrow"><span aria-hidden="true">📍</span> Connecticut food access</p>
-        <h1>Find food you can <span>actually reach.</span></h1>
-        <p class="lead">Find nearby food pantries, SNAP-accepting stores, mobile markets and food resources based on how you get around and when you're free.</p>
-        <div class="hero-actions">
-          <a class="btn btn-navy btn-lg" href="pages/signup.html" id="hero-start">Get started <span aria-hidden="true">→</span></a>
-          <a class="btn btn-outline btn-lg" href="#how">How it works</a>
-        </div>
-      </div>
-      <div class="hero-photo">
-        <img src="assets/hero.jpg" alt="Volunteers handing out groceries at a community food pantry" width="1200" height="860" onerror="this.remove()">
-        <div class="photo-badge">
-          <span class="badge-icon" aria-hidden="true">✓</span>
-          <div><strong>Food access made easier</strong><span>Transportation + availability + distance</span></div>
+  <section class="home-hero">
+    <span class="blob b1" aria-hidden="true"></span>
+    <span class="blob b2" aria-hidden="true"></span>
+    <span class="blob b3" aria-hidden="true"></span>
+
+    <div class="wrap">
+      <h1 class="typed-title" aria-label="More access, less hassle.">
+        <span class="typed" id="typed" aria-hidden="true"></span><span class="caret" aria-hidden="true"></span>
+      </h1>
+
+      <p class="mission reveal d1">Find SNAP-accepting stores near you, plan your trip with or without a car,<br class="lg-br"> and order groceries for pickup or delivery, all in one place.</p>
+
+      <div class="cta reveal d2">
+        <div class="cta-row">
+          <span class="btn-wrap">
+            <a class="btn-cta" href="pages/map.html">
+              <span>Get started</span>
+              <svg class="cta-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </span>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="transport-strip" id="resources" aria-label="Ways Doorstep helps">
-    <ul class="wrap transport-grid">
-      <li class="transport-item"><span class="t-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16M8 21l1.5-3M16 21l-1.5-3"/></svg></span><div><strong>Public transit</strong><small>Transit-friendly options</small></div></li>
-      <li class="transport-item"><span class="t-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4.5" r="1.8"/><path d="M11 21l2-6-3-3 1-5 3 1 2 3M8 12l-2 3M13 15l3 6"/></svg></span><div><strong>Walking</strong><small>Nearby resources</small></div></li>
-      <li class="transport-item"><span class="t-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg></span><div><strong>Driving</strong><small>Fastest routes</small></div></li>
-      <li class="transport-item"><span class="t-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><strong>Open now</strong><small>Store hours that fit you</small></div></li>
-      <li class="transport-item"><span class="t-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span><div><strong>Pickup</strong><small>Schedule a pickup</small></div></li>
-      <li class="transport-item"><span class="t-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg></span><div><strong>Delivery</strong><small>For eligible users</small></div></li>
-    </ul>
-  </section>
-
-  <section class="choice-section" id="how">
+  <section class="help-section">
     <div class="wrap">
-      <div class="section-heading">
-        <span class="section-label">How it works</span>
-        <h2>Choose how you want to find food</h2>
-        <p>Search step by step, or describe what you need to our food-access assistant.</p>
-      </div>
-      <div class="choice-grid">
-        <a class="choice-card" href="pages/signup.html" id="manual-card">
-          <span class="choice-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></span>
-          <div>
-            <h3>Manual search</h3>
-            <p>Create an account and search food pantries, SNAP stores and mobile markets on a map.</p>
-            <div class="tags"><span>Location</span><span>Transport</span><span>Schedule</span></div>
-          </div>
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-        <a class="choice-card alt" href="pages/assistant.html">
-          <span class="choice-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/></svg></span>
-          <div>
-            <h3>Get assistance</h3>
-            <p>Tell the assistant what you need in plain language and get accessible options. No account needed.</p>
-            <div class="tags"><span>Pantry near me</span><span>Open now</span><span>By bus</span></div>
-          </div>
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="community-section" id="about">
-    <div class="wrap">
-      <div class="community-card">
-        <div class="community-photo"><img src="assets/hero.jpg" alt="" onerror="this.remove()"></div>
-        <div class="community-content">
-          <span class="section-label">Stronger communities</span>
-          <h2>Better food access, right to your doorstep.</h2>
-          <p>Doorstep connects Connecticut residents with food resources they can realistically reach, taking distance, transportation, store hours and mobility into account.</p>
-          <ul class="benefits">
-            <li><strong>Nearby</strong><span>Resources close to you</span></li>
-            <li><strong>Accessible</strong><span>Designed for real needs</span></li>
-            <li><strong>Connected</strong><span>Pickup or delivery</span></li>
-          </ul>
-        </div>
-      </div>
       <div class="help-strip">
         <div><strong>Need food right now?</strong><br>Call 211 to reach a Connecticut specialist any time.</div>
         <a class="btn btn-orange" href="tel:211">Call 211</a>
@@ -122,13 +65,14 @@
 
 <footer class="site-footer">
   <div class="wrap footer-grid">
-    <div><h4>Doorstep</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
+    <div><h4>Doorstep</h4><p>A hackathon prototype connecting SNAP shoppers in Connecticut with food they can reach.</p></div>
     <div><h4>Data we use</h4><ul><li>USDA SNAP retailer data</li><li>CTtransit routes</li><li>Public pantry directories</li></ul></div>
-    <div><h4>Links</h4><ul><li><a href="pages/signup.html">Sign up</a></li><li><a href="pages/login.html">Sign in</a></li><li><a href="#how">How it works</a></li></ul></div>
+    <div><h4>Links</h4><ul><li><a href="pages/signup.html">Sign up</a></li><li><a href="pages/login.html">Sign in</a></li><li><a href="pages/assistant.html">Assistant</a></li></ul></div>
     <p class="footer-fine">Prototype for demonstration only. Not an official State of Connecticut website. Store hours and stock may change; confirm before you travel.</p>
   </div>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="js/main.js"></script>
+<script src="js/home.js"></script>
 </body>
 </html>

@@ -47,12 +47,5 @@
         .finally(function () { window.location.href = inPages ? '../index.html' : 'index.html'; });
     });
     links.appendChild(hi); links.appendChild(mapLink); links.appendChild(out);
-
-    // On the landing page, send signed-in people straight to the map instead of sign up.
-    Array.prototype.forEach.call(document.querySelectorAll('#hero-start, #manual-card'), function (a) {
-      a.href = 'pages/map.html';
-    });
-    var start = document.getElementById('hero-start');
-    if (start) start.innerHTML = 'Continue to nearby stores <span aria-hidden="true">\u2192</span>';
   }
 })();
