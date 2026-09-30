@@ -302,3 +302,19 @@ body.cart-open{overflow:hidden}
   .menu-btn{order:2}
   .header-menu{order:3}
 }
+/* Signed in, the header holds more (greeting, Nearby stores, Sign out, cart):
+   keep it on one line, and fold the links into the Menu button sooner. */
+.signed-in .main-nav a,.signed-in .hello,.signed-in .auth-links .btn,.signed-in .link-btn,.signed-in .brand-text strong{white-space:nowrap}
+.signed-in .main-nav a{padding-left:8px;padding-right:8px}
+@media (max-width:1180px){
+  .signed-in .menu-btn{display:inline-block;order:2}
+  .signed-in .header-row{flex-wrap:wrap;gap:10px}
+  .signed-in .brand{flex:1 1 0;min-width:0}
+  .signed-in .cart-btn{order:1;margin-left:0}
+  .signed-in .header-menu{order:3;display:none;width:100%;flex-direction:column;align-items:stretch;gap:12px;border-top:1px solid var(--line);padding-top:10px}
+  .signed-in .header-menu.open{display:flex}
+  .signed-in .main-nav ul{flex-direction:column}
+  .signed-in .main-nav a{padding:12px 4px;border-bottom:1px solid var(--line)}
+  .signed-in .auth-links{flex-wrap:wrap}
+  .signed-in .auth-links .btn{flex:1}
+}

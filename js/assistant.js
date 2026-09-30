@@ -199,11 +199,6 @@
     });
   }
 
-  function lineFor(x) {
-    const extra = [x.option, x.size].filter(Boolean).join(", ");
-    return "• " + x.qty + " × " + x.item + (extra ? " (" + extra + ")" : "");
-  }
-
   function renderDish(dish, usedAI) {
     const ings = normalize(dish.ingredients).filter(x => x.item);
     if (!ings.length) return;
@@ -286,20 +281,6 @@
 
     if (data.note) r.append(el("p", "src", data.note));
 
-    if (e.length) {
-      const foot = el("div", "foot");
-      const btn = el("button", null, "Copy my SNAP list");
-      btn.type = "button";
-      const msg = el("span", "copied");
-      btn.onclick = async () => {
-        let txt = "SNAP-eligible items:\n" + e.map(lineFor).join("\n");
-        if (d.length) txt += "\n\nCheck before buying:\n" + d.map(lineFor).join("\n");
-        try { await navigator.clipboard.writeText(txt); msg.textContent = "Copied"; }
-        catch { msg.textContent = "Couldn’t copy. Select the list and copy it by hand."; }
-      };
-      foot.append(btn, msg);
-      r.append(foot);
-    }
     if (!usedAI) r.append(el("p", "src", "Quick check by keyword matching. Double-check anything unusual."));
     thread.append(r);
     dishes.forEach(d => renderDish(d, usedAI));
@@ -479,18 +460,6 @@
       c.insertBefore(el("p", "error", problem || "No price estimates were available for these items."), total);
     }
 
-    const foot = el("div", "foot");
-    const btn = el("button", null, "Copy my cart"); btn.type = "button";
-    const msg = el("span", "copied");
-    btn.onclick = async () => {
-      const txt = "My cart:\n" + lines.map(x => lineFor(x) + (x.price ? " — " + money(x.price * x.qty) : "")).join("\n") +
-        (priced ? "\n\nEstimated total: " + money(sum) : "");
-      try { await navigator.clipboard.writeText(txt); msg.textContent = "Copied"; }
-      catch { msg.textContent = "Couldn’t copy. Select the cart and copy it by hand."; }
-    };
-    foot.append(btn, msg);
-    c.append(foot);
-
     // Keep the cart in this browser so the order page can pick it up later.
     try { localStorage.setItem("ctfa_cart", JSON.stringify({ at: Date.now(), items: lines, total: priced ? Math.round(sum * 100) / 100 : null })); } catch {}
     // Cart confirmed: ask the shopper to sign in, then take them to the sign-in page.
@@ -502,6 +471,7 @@
     next.append(go);
     thread.append(next);
     box.disabled = true; send.disabled = true;
+    form.closest(".composer").hidden = true; // nothing more to type: we're heading to sign in
     let left = 5;
     const tick = () => {
       if (left <= 0) { location.href = "login.html"; return; }
