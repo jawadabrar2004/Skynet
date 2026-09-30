@@ -111,7 +111,9 @@ async function askClaude(userText) {
   return data;
 }
 
-const INDEX = path.join(__dirname, "public", "index.html");
+// The website: public/index.html, or index.html next to server.js if that's where it was put
+const INDEX = [path.join(__dirname, "public", "index.html"), path.join(__dirname, "index.html")]
+  .find(f => fs.existsSync(f)) || path.join(__dirname, "public", "index.html");
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost");
