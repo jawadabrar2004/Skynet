@@ -168,6 +168,13 @@
     var disBlock = $('#disability-block'), profile = null;
 
     phone.addEventListener('input', function () { phone.value = fmtPhone(phone.value); });
+    // Sent here from sign in because the number has no account yet.
+    var fromLogin = normPhone(new URLSearchParams(location.search).get('phone'));
+    if (fromLogin.length === 10) {
+      phone.value = fmtPhone(fromLogin);
+      var note = $('#new-number'); if (note) note.hidden = false;
+      history.replaceState(null, '', location.pathname);
+    }
     ebt.addEventListener('input', function () { ebt.value = fmtEbt(ebt.value); });
     $all('input[name="disabled"]').forEach(function (r) {
       r.addEventListener('change', function () {
@@ -264,8 +271,16 @@
       start().then(function (d) {
         busy(btn, false);
         if (d.status === 200) { setErr('phone', ''); showVerify(d); return; }
+        // No account for this number: go straight to sign up, with the number filled in.
+        if (d.status === 404) { window.location.href = 'signup.html?phone=' + p; return; }
         setErr('phone', (d.errors && d.errors.phone) || message(d)); phone.focus();
       });
+    });
+
+    // Continue as guest: browse stores and shop without an account.
+    var guest = $('#guest-btn');
+    if (guest) guest.addEventListener('click', function () {
+      try { localStorage.setItem('ctfa_guest', '1'); } catch (e) {}
     });
   }
 

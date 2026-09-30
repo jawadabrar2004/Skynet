@@ -288,3 +288,6 @@ body.cart-open{overflow:hidden}
   .signed-in .auth-links{flex-wrap:wrap}
   .signed-in .auth-links .btn{flex:1}
 }
+/* Sign in: "or" between the code button and Continue as guest */
+.or-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.or-divider::before,.or-divider::after{content:"";flex:1;height:1px;background:var(--line)}
