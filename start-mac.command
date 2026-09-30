@@ -14,3 +14,4 @@ if ! grep -q "^ANTHROPIC_API_KEY=sk-" config.txt 2>/dev/null; then
 fi
 (sleep 1 && open "http://localhost:3000") &
 node server.js
+
