@@ -130,6 +130,11 @@
   dialog.setAttribute('aria-labelledby', 'order-title');
   document.body.appendChild(dialog);
   dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+  // Keep a showing notification on screen after the popup closes.
+  dialog.addEventListener('close', function () {
+    var n = dialog.querySelector('.push-note');
+    if (n) document.body.appendChild(n);
+  });
 
   // Every 30 minutes from about an hour from now until 9 PM, then tomorrow from 9 AM.
   function pickupSlots() {
@@ -242,31 +247,135 @@
     panel.appendChild(back);
   }
 
-  function placeOrder(when) {
-    var c = load(), shop = store();
-    var order = { id: 'DS-' + Math.floor(100000 + Math.random() * 900000), placedAt: Date.now(),
-                  pickupAt: when.toISOString(), store: shop, items: c.items, total: c.total };
+  function saveOrder(order) {
     try {
-      var orders = JSON.parse(localStorage.getItem('ctfa_orders') || '[]');
+      var orders = JSON.parse(localStorage.getItem('ctfa_orders') || '[]').filter(function (o) { return o.id !== order.id; });
       orders.push(order);
       localStorage.setItem('ctfa_orders', JSON.stringify(orders.slice(-20)));
-      sessionStorage.removeItem('ctfa_pickup');
     } catch (e) {}
+  }
+
+  function placeOrder(when) {
+    var c = load(), shop = store();
+    var order = { id: 'DS-' + Math.floor(100000 + Math.random() * 900000), placedAt: Date.now(), status: 'sent',
+                  pickupAt: when.toISOString(), store: shop, items: c.items, total: c.total };
+    saveOrder(order);
+    try { sessionStorage.removeItem('ctfa_pickup'); } catch (e) {}
     save({ items: [] });
+    showShopperStatus(order);
+    document.dispatchEvent(new CustomEvent('ctfa-order', { detail: order }));
+  }
+
+  function storeName(order) { return order.store ? order.store.name : 'the store'; }
+
+  // Shopper's view: sent to the store (waiting), or ready for pickup once the store accepts.
+  function showShopperStatus(order) {
+    var ready = order.status === 'ready';
     dialog.textContent = '';
     var panel = el('div', 'od od-done');
-    panel.appendChild(el('div', 'od-check', '✓'));
-    var t = el('h2', null, 'Order confirmed'); t.id = 'order-title';
+    panel.appendChild(el('div', ready ? 'od-check' : 'od-check od-wait', ready ? '✓' : '⏳'));
+    var t = el('h2', null, ready ? 'Your pickup order is ready!' : 'Order confirmed'); t.id = 'order-title';
     panel.appendChild(t);
     panel.appendChild(el('p', null, 'Order number ' + order.id));
-    panel.appendChild(el('p', null, 'Pick up at ' + (shop ? shop.name : 'your store') + ', ' + slotLabel(when) + '.'));
-    panel.appendChild(el('p', 'od-note', 'Pay at pickup with your EBT card.'));
-    var done = el('button', 'btn btn-navy', 'Done'); done.type = 'button';
-    done.onclick = function () { dialog.close(); };
-    panel.appendChild(done);
+    panel.appendChild(el('p', null, (ready ? 'Pick it up at ' : 'Pickup at ') + storeName(order) + ', ' + slotLabel(new Date(order.pickupAt)) + '.'));
+
+    var steps = el('ol', 'od-steps');
+    [['Order sent', true], ['Accepted by ' + storeName(order), ready], ['Ready for pickup', ready]].forEach(function (s) {
+      var li = el('li', s[1] ? 'done' : '', s[0]);
+      steps.appendChild(li);
+    });
+    panel.appendChild(steps);
+
+    if (ready) {
+      panel.appendChild(el('p', 'od-note', 'Show your order number at the counter and pay with your EBT card.'));
+      var done = el('button', 'btn btn-navy', 'Done'); done.type = 'button';
+      done.onclick = function () { dialog.close(); };
+      panel.appendChild(done);
+    } else {
+      panel.appendChild(el('p', 'od-note', 'Waiting for ' + storeName(order) + ' to accept your order.'));
+      var actions = el('div', 'od-actions od-stack');
+      var demo = el('button', 'btn btn-orange', 'Open retailer demo'); demo.type = 'button';
+      demo.onclick = function () { showRetailer(order); };
+      var later = el('button', 'btn btn-outline', 'Close'); later.type = 'button';
+      later.onclick = function () { dialog.close(); };
+      actions.appendChild(demo); actions.appendChild(later);
+      panel.appendChild(actions);
+    }
     dialog.appendChild(panel);
     if (!dialog.open) dialog.showModal();
-    document.dispatchEvent(new CustomEvent('ctfa-order', { detail: order }));
+  }
+
+  // Retailer demo: what the store sees when the order comes in, with Accept order.
+  function showRetailer(order) {
+    dialog.textContent = '';
+    var panel = el('div', 'od retailer');
+    var bar = el('div', 'rt-bar');
+    bar.appendChild(el('span', 'rt-demo', 'Retailer demo'));
+    bar.appendChild(el('strong', null, storeName(order)));
+    panel.appendChild(bar);
+
+    var t = el('h2', null, 'New pickup order'); t.id = 'order-title';
+    panel.appendChild(t);
+    var meta = el('div', 'rt-meta');
+    [['Order', order.id], ['Pickup', slotLabel(new Date(order.pickupAt))], ['Payment', 'EBT at pickup']].forEach(function (m) {
+      var d = el('div');
+      d.appendChild(el('small', null, m[0]));
+      d.appendChild(el('b', null, m[1]));
+      meta.appendChild(d);
+    });
+    panel.appendChild(meta);
+
+    panel.appendChild(el('h3', null, 'Items to pack'));
+    var ul = el('ul', 'od-items rt-items');
+    order.items.forEach(function (it) {
+      var li = el('li'), name = el('div');
+      name.appendChild(el('b', null, it.qty + ' × ' + it.item));
+      var detail = [it.option, it.size].filter(Boolean).join(', ');
+      if (detail) name.appendChild(el('small', null, detail));
+      li.appendChild(name);
+      li.appendChild(el('span', null, it.price ? money(it.price * it.qty) : '—'));
+      ul.appendChild(li);
+    });
+    panel.appendChild(ul);
+    panel.appendChild(el('p', 'od-total', order.total != null ? 'Estimated total: ' + money(order.total) : ''));
+
+    var actions = el('div', 'od-actions od-stack');
+    var accept = el('button', 'btn rt-accept', 'Accept order'); accept.type = 'button';
+    accept.onclick = function () {
+      order.status = 'ready';
+      saveOrder(order);
+      showShopperStatus(order);
+      notify('Your pickup order is ready', 'Order ' + order.id + ' is ready to pick up at ' + storeName(order) + '.');
+    };
+    var back = el('button', 'link-btn', '← Back to shopper view'); back.type = 'button';
+    back.onclick = function () { showShopperStatus(order); };
+    actions.appendChild(accept);
+    panel.appendChild(actions);
+    panel.appendChild(back);
+    dialog.appendChild(panel);
+    if (!dialog.open) dialog.showModal();
+  }
+
+  // A phone-style notification that slides in at the top of the screen.
+  function notify(title, text) {
+    var old = document.querySelector('.push-note');
+    if (old) old.remove();
+    var n = el('div', 'push-note');
+    n.setAttribute('role', 'status');
+    n.appendChild(el('span', 'pn-icon', '🛍️'));
+    var body = el('div', 'pn-body');
+    body.appendChild(el('small', null, 'Doorstep · now'));
+    body.appendChild(el('b', null, title));
+    body.appendChild(el('span', null, text));
+    n.appendChild(body);
+    var x = el('button', 'pn-close', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Dismiss notification');
+    x.onclick = function () { n.remove(); };
+    n.appendChild(x);
+    // Inside the open popup so it shows above it (the popup sits in the browser's top layer).
+    (dialog.open ? dialog : document.body).appendChild(n);
+    if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+    requestAnimationFrame(function () { n.classList.add('show'); });
+    setTimeout(function () { n.classList.remove('show'); setTimeout(function () { n.remove(); }, 400); }, 7000);
   }
 
   // Back from signing in: reopen the popup.
