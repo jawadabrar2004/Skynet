@@ -302,3 +302,9 @@ body.theme-ai::after{
 /* Keep scrolled-to messages clear of the sticky header and message box */
 #thread > *{scroll-margin-top:24px;scroll-margin-bottom:110px}
 .theme-ai #thread > *{scroll-margin-top:96px}
+
+/* "What do you want today?" page (pages/shop.html): the question and one box, centered, no chat below */
+.shop-page{padding-top:56px;padding-bottom:64px;min-height:calc(100vh - 260px)}
+.shop-page .composer{position:static;margin-top:28px;padding-top:0;background:none}
+.shop-page h1 label{cursor:text}
+.shop-change{text-align:center;margin:18px 0 0;font-size:15px}

@@ -430,13 +430,22 @@
             <div class="store-distance">${miles.toFixed(1)} mi</div>
             <div class="store-duration">${routeLabel}</div>
           </div>
-          <button class="direction-link" type="button" data-route-id="${escapeAttr(store.id)}" aria-label="Show directions to ${escapeAttr(store.name)} on this map">➤ Directions</button>
+          ${state.selectedId === store.id
+            ? `<button class="confirm-shop" type="button" data-confirm-id="${escapeAttr(store.id)}">✓ Confirm this shop</button>`
+            : `<button class="direction-link" type="button" data-route-id="${escapeAttr(store.id)}" aria-label="Show directions to ${escapeAttr(store.name)} on this map">➤ Directions</button>`}
         </article>`;
     }).join('');
 
     els.list.querySelectorAll('.store-card').forEach(card => {
       const select = () => selectStore(card.dataset.id);
       card.addEventListener('click', e => {
+        const confirmButton = e.target.closest('[data-confirm-id]');
+        if (confirmButton) {
+          e.stopPropagation();
+          const store = state.stores.find(s => s.id === confirmButton.dataset.confirmId);
+          if (store) confirmShop(store);
+          return;
+        }
         const routeButton = e.target.closest('[data-route-id]');
         if (routeButton) {
           e.stopPropagation();
@@ -482,6 +491,17 @@
       labelOrigin: new google.maps.Point(0, -31),
       anchor: new google.maps.Point(0, 0)
     };
+  }
+
+  // The shopper picked this store: remember it, then ask what they want to buy there.
+  function confirmShop(store) {
+    try {
+      localStorage.setItem('ctfa_store', JSON.stringify({
+        id: store.id, name: store.name, type: store.type || '', address: store.address || '',
+        lat: store.lat, lng: store.lng, at: Date.now()
+      }));
+    } catch (e) {}
+    window.location.href = 'shop.html';
   }
 
   function selectStore(id) {

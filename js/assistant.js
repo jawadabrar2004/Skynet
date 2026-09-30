@@ -7,6 +7,12 @@
   const box = document.getElementById("box");
   const send = document.getElementById("send");
 
+  // The store the shopper confirmed on the map (if any) is shown at the top.
+  let store = null;
+  try { store = JSON.parse(localStorage.getItem("ctfa_store") || "null"); } catch {}
+  const eyebrow = document.querySelector(".snap-intro .eyebrow");
+  if (store && store.name && eyebrow) eyebrow.lastChild.textContent = "Shopping at " + store.name;
+
   // The shopper's list so far: live item objects from the receipts, so quantity and size changes count.
   // It keeps growing until the shopper confirms it; then it becomes the cart and a new list starts.
   let list = [];
@@ -461,7 +467,7 @@
     }
 
     // Keep the cart in this browser so the order page can pick it up later.
-    try { localStorage.setItem("ctfa_cart", JSON.stringify({ at: Date.now(), items: lines, total: priced ? Math.round(sum * 100) / 100 : null })); } catch {}
+    try { localStorage.setItem("ctfa_cart", JSON.stringify({ at: Date.now(), store: store && store.name ? store : null, items: lines, total: priced ? Math.round(sum * 100) / 100 : null })); } catch {}
     // Cart confirmed: ask the shopper to sign in, then take them to the sign-in page.
     const next = el("div", "next");
     next.append(el("p", "ask", "Your cart is saved. Please sign in to continue."));
