@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Can I buy it with SNAP? · Connecticut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #E8EFE9;
+    --ink: #1C2A22;
+    --muted: #55665B;
+    --paper: #FFFFFF;
+    --line: #C9D6CC;
+    --yes: #1F6B3F;
+    --yes-bg: #E1F1E6;
+    --no: #A8322E;
+    --no-bg: #F8E4E2;
+    --maybe: #8A5A00;
+    --maybe-bg: #FBF0D6;
+    --accent: #1F6B3F;
+    --user-bubble: #1F6B3F;
+    --user-ink: #FFFFFF;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121A15; --ink: #E4ECE6; --muted: #9DB0A3; --paper: #1B2620; --line: #2E3D34;
+      --yes: #7FD39E; --yes-bg: #1E3528; --no: #F19A93; --no-bg: #3A2221;
+      --maybe: #F0C567; --maybe-bg: #3A3020; --accent: #7FD39E; --user-bubble: #2F7A4D; --user-ink: #FFFFFF;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121A15; --ink: #E4ECE6; --muted: #9DB0A3; --paper: #1B2620; --line: #2E3D34;
+    --yes: #7FD39E; --yes-bg: #1E3528; --no: #F19A93; --no-bg: #3A2221;
+    --maybe: #F0C567; --maybe-bg: #3A3020; --accent: #7FD39E; --user-bubble: #2F7A4D; --user-ink: #FFFFFF;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Atkinson Hyperlegible", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.0625rem; line-height: 1.55;
+  }
+  .wrap { max-width: 44rem; margin: 0 auto; padding: 2rem 1.25rem 9rem; }
+  header h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.1; margin: 0 0 .6rem; letter-spacing: -0.01em; }
+  header p { margin: 0 0 .4rem; color: var(--muted); max-width: 36rem; }
+  .examples { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.25rem 0 0; }
+  .examples button {
+    font: inherit; font-size: .95rem; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    padding: .45rem .8rem; border-radius: 999px; cursor: pointer;
+  }
+  .examples button:hover { border-color: var(--accent); }
+
+  #thread { margin-top: 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+  .you {
+    align-self: flex-end; max-width: 85%; background: var(--user-bubble); color: var(--user-ink);
+    padding: .7rem 1rem; border-radius: 1.1rem 1.1rem .3rem 1.1rem; white-space: pre-wrap; word-wrap: break-word;
+  }
+  .status { color: var(--muted); font-style: italic; }
+  .error { background: var(--no-bg); color: var(--no); padding: .8rem 1rem; border-radius: .6rem; }
+
+  /* The receipt: the one bold element */
+  .receipt {
+    align-self: flex-start; width: 100%; max-width: 30rem; background: var(--paper); color: var(--ink);
+    font-family: "Courier Prime", "Courier New", monospace; font-size: 1rem;
+    padding: 1.4rem 1.4rem 1.8rem; position: relative;
+    box-shadow: 0 1px 0 var(--line), 0 10px 24px -18px rgba(0,0,0,.45);
+    --tooth: 10px;
+    -webkit-mask: conic-gradient(from 135deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom/var(--tooth) calc(var(--tooth)/2) repeat-x,
+                  linear-gradient(#000 0 0) top/100% calc(100% - var(--tooth)/2 + 1px) no-repeat;
+            mask: conic-gradient(from 135deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom/var(--tooth) calc(var(--tooth)/2) repeat-x,
+                  linear-gradient(#000 0 0) top/100% calc(100% - var(--tooth)/2 + 1px) no-repeat;
+  }
+  .receipt .head { text-align: center; border-bottom: 2px dashed var(--line); padding-bottom: .8rem; margin-bottom: .8rem; }
+  .receipt .head strong { display: block; font-size: 1.1rem; }
+  .receipt .head span { color: var(--muted); font-size: .9rem; }
+  .sec { margin: 1rem 0 0; }
+  .sec h2 { font-size: 1rem; margin: 0 0 .4rem; display: flex; justify-content: space-between; gap: 1rem; }
+  .sec.yes h2 { color: var(--yes); }
+  .sec.no h2 { color: var(--no); }
+  .sec.maybe h2 { color: var(--maybe); }
+  .sec ul { list-style: none; margin: 0; padding: 0; }
+  .sec li { padding: .45rem 0; border-bottom: 1px dotted var(--line); }
+  .sec li:last-child { border-bottom: 0; }
+  .sec li b { font-weight: 700; }
+  .sec li small { display: block; color: var(--muted); font-size: .88rem; line-height: 1.4; margin-top: .1rem;
+    font-family: "Atkinson Hyperlegible", "Segoe UI", sans-serif; }
+  .mark { display: inline-block; width: 1.4em; font-weight: 700; }
+  .sec.yes .mark { color: var(--yes); }
+  .sec.no .mark { color: var(--no); }
+  .sec.maybe .mark { color: var(--maybe); }
+  .foot { border-top: 2px dashed var(--line); margin-top: 1rem; padding-top: .8rem; display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+  .foot button {
+    font: inherit; font-family: "Atkinson Hyperlegible", sans-serif; font-size: .95rem; cursor: pointer;
+    background: var(--yes-bg); color: var(--yes); border: 1px solid var(--yes); padding: .4rem .8rem; border-radius: .4rem;
+  }
+  .foot .copied { color: var(--muted); font-size: .9rem; font-family: "Atkinson Hyperlegible", sans-serif; }
+  .row { display: flex; align-items: flex-start; gap: .5rem; }
+  .row .name { flex: 1; min-width: 0; }
+  .ctrls { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-top: .4rem;
+    font-family: "Atkinson Hyperlegible", "Segoe UI", sans-serif; }
+  .stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: .5rem; overflow: hidden; background: var(--bg); }
+  .stepper button {
+    font: inherit; font-weight: 700; font-size: 1.1rem; line-height: 1; width: 2.2rem; height: 2.2rem;
+    border: 0; background: transparent; color: var(--accent); cursor: pointer;
+  }
+  .stepper button:hover:not(:disabled) { background: var(--yes-bg); }
+  .stepper button:disabled { color: var(--muted); opacity: .45; cursor: default; }
+  .stepper output { min-width: 2rem; text-align: center; font-weight: 700; font-size: 1rem; }
+  .size {
+    font: inherit; font-size: .95rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+    border-radius: .5rem; height: 2.2rem; padding: 0 .5rem; max-width: 100%;
+  }
+  .total { font-family: "Atkinson Hyperlegible", sans-serif; font-size: .95rem; color: var(--muted); margin-top: .6rem; }
+  .dish .head strong { font-size: 1.2rem; }
+  .dish .why { font-family: "Atkinson Hyperlegible", sans-serif; margin: 0 0 .8rem; line-height: 1.5; }
+  .dish ul { list-style: none; margin: 0; padding: 0; }
+  .dish li { border-bottom: 1px dotted var(--line); }
+  .dish li:last-child { border-bottom: 0; }
+  .dish label { display: flex; gap: .6rem; align-items: flex-start; padding: .45rem 0; cursor: pointer; }
+  .dish input[type=checkbox] { width: 1.15rem; height: 1.15rem; margin-top: .2rem; accent-color: var(--yes); flex: none; }
+  .dish label small { display: block; color: var(--muted); font-size: .88rem; font-family: "Atkinson Hyperlegible", sans-serif; }
+  .dish .ask { font-family: "Atkinson Hyperlegible", sans-serif; font-weight: 700; margin: 1rem 0 .6rem; }
+  .dish .actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .dish .actions button {
+    font: inherit; font-family: "Atkinson Hyperlegible", sans-serif; font-size: .98rem; cursor: pointer;
+    padding: .55rem 1rem; border-radius: .5rem; border: 1px solid var(--yes);
+  }
+  .dish .actions .primary { background: var(--user-bubble); color: var(--user-ink); border-color: var(--user-bubble); font-weight: 700; }
+  .dish .actions .secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+  .dish .actions button:disabled { opacity: .5; cursor: default; }
+  .dish .done { font-family: "Atkinson Hyperlegible", sans-serif; color: var(--muted); margin: .8rem 0 0; }
+  .opt { font-weight: 400; color: var(--muted); }
+  .src { font-family: "Atkinson Hyperlegible", sans-serif; font-size: .82rem; color: var(--muted); margin-top: .9rem; }
+
+  /* Composer fixed at bottom */
+  .composer {
+    position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg);
+    border-top: 1px solid var(--line);
+    padding: .8rem 1rem calc(.8rem + env(safe-area-inset-bottom, 0px));
+  }
+  .composer form { max-width: 44rem; margin: 0 auto; display: flex; gap: .6rem; align-items: flex-end; }
+  .composer label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .composer textarea {
+    flex: 1; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+    border-radius: .8rem; padding: .7rem .9rem; resize: none; min-height: 3rem; max-height: 9rem;
+  }
+  .composer button {
+    font: inherit; font-weight: 700; background: var(--user-bubble); color: var(--user-ink); border: 0;
+    border-radius: .8rem; padding: .75rem 1.1rem; cursor: pointer; min-height: 3rem;
+  }
+  .composer button:disabled { opacity: .55; cursor: default; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .notice { font-size: .9rem; color: var(--muted); margin-top: 1rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    .receipt { animation: print .45s ease-out; transform-origin: top; }
+    @keyframes print { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Can I buy it with SNAP?</h1>
+    <p>Tell me what you want to buy. I’ll sort it into what your Connecticut SNAP benefits cover and what they don’t.</p>
+    <p>Type it however you like, for example “milk, 2 bags of chips, dog food, and a hot pizza from the deli.” You can also name a meal, like “I want to make a burger,” and I’ll list the groceries to make it.</p>
+    <div class="examples" aria-label="Try an example">
+      <button type="button" data-ex="eggs, bread, bananas, soda, diapers, dish soap">Weekly groceries</button>
+      <button type="button" data-ex="birthday cake, candles, balloons, ice cream, juice boxes, paper plates">Birthday party</button>
+      <button type="button" data-ex="rotisserie chicken, cold sub sandwich, energy drink, vitamins, beer">Quick lunch run</button>
+      <button type="button" data-ex="tomato seeds, cat food, live lobster, baby formula, toothpaste">Mixed list</button>
+      <button type="button" data-ex="I want to make a burger">Make a burger</button>
+      <button type="button" data-ex="tacos for dinner and a gallon of milk">Tacos + milk</button>
+    </div>
+  </header>
+
+  <div id="thread" aria-live="polite"></div>
+  <p class="notice" id="notice">Based on federal USDA SNAP rules as of September 2026. Connecticut has no extra soda or candy ban. Rules can change, so check <a href="https://portal.ct.gov/dss" target="_blank" rel="noopener">CT DSS</a> for official updates.</p>
+</div>
+
+<div class="composer">
+  <form id="form">
+    <label for="box">What do you want to buy?</label>
+    <textarea id="box" rows="1" placeholder="List the items you want to buy…"></textarea>
+    <button id="send" type="submit">Check</button>
+  </form>
+</div>
+
+<script>
+(() => {
+  const thread = document.getElementById("thread");
+  const form = document.getElementById("form");
+  const box = document.getElementById("box");
+  const send = document.getElementById("send");
+
+
+  // Offline fallback: simple keyword classifier
+  const NO = [
+    [/\b(beer|wine|liquor|vodka|whiskey|whisky|rum|tequila|gin|seltzer.*hard|hard seltzer|alcohol|champagne|cider.*hard)\b/i, "Alcohol"],
+    [/\b(cigarette|cigar|tobacco|vape|e-?cig|nicotine|juul|chew)\w*/i, "Tobacco or nicotine"],
+    [/\b(vitamin|supplement|medicine|tylenol|advil|ibuprofen|aspirin|cough|cold medicine|allergy)\w*/i, "Vitamins, medicine or supplements"],
+    [/\b(dog food|cat food|pet food|kibble|dog treat|cat treat|bird seed|fish food|cat litter|litter)\b/i, "Pet food and supplies"],
+    [/\b(diaper|wipes|soap|shampoo|conditioner|toothpaste|toothbrush|deodorant|razor|tampon|pad|lotion|makeup|cosmetic|lipstick)\w*/i, "Hygiene or personal care item"],
+    [/\b(paper towel|toilet paper|napkin|paper plate|plates|cups|foil|plastic wrap|trash bag|garbage bag|ziploc)\w*/i, "Paper or household product"],
+    [/\b(detergent|bleach|dish soap|cleaner|sponge|lysol|windex)\w*/i, "Cleaning supply"],
+    [/\b(balloon|candle|decoration|card|gift card|lottery|battery|batteries|light bulb)\w*/i, "Not a food item"],
+    [/\bhot\b/i, "Hot food at checkout"],
+  ];
+  const MAYBE = [
+    [/\b(energy drink|red bull|monster|bang)\b/i, "OK only with a Nutrition Facts label"],
+    [/\b(rotisserie|deli chicken)\b/i, "OK only if bought cold"],
+    [/\b(protein powder|protein shake)\b/i, "OK only with a Nutrition Facts label"],
+    [/\blive lobster|\blive crab|\bshellfish\b/i, "Live shellfish is allowed"],
+  ];
+  const SIZES = [
+    [/milk/i, ["1 pint","1 quart","Half gallon","1 gallon"], "1 gallon"],
+    [/ground (beef|turkey|pork)|beef|steak|pork|chicken breast|chicken thigh|turkey/i, ["0.5 lb","1 lb","2 lb","3 lb","5 lb"], "1 lb"],
+    [/egg/i, ["6 count","12 count","18 count","24 count"], "12 count"],
+    [/juice/i, ["Juice boxes (8-pack)","32 oz","52 oz","64 oz","1 gallon"], "64 oz"],
+    [/soda|cola|pepsi|sprite/i, ["12 oz can","20 oz bottle","2 liter","6-pack","12-pack"], "2 liter"],
+    [/water/i, ["16.9 oz bottle","1 gallon","24-pack","2.5 gallon"], "24-pack"],
+    [/chip/i, ["1 oz bag","8 oz bag","Family size (13 oz)"], "8 oz bag"],
+    [/cheese/i, ["8 oz","16 oz","2 lb"], "8 oz"],
+    [/yogurt/i, ["Single cup","4-pack","32 oz tub"], "32 oz tub"],
+    [/butter/i, ["1 stick","1 lb (4 sticks)","2 lb"], "1 lb (4 sticks)"],
+    [/rice/i, ["1 lb","2 lb","5 lb","10 lb","20 lb"], "2 lb"],
+    [/flour|sugar/i, ["2 lb","4 lb","5 lb","10 lb"], "5 lb"],
+    [/banana|apple|orange|potato|onion|grape|tomato/i, ["1 lb","2 lb","3 lb bag","5 lb bag"], "2 lb"],
+    [/bread|loaf/i, ["1 loaf","2 loaves"], "1 loaf"],
+    [/cereal/i, ["Regular box","Family size box"], "Regular box"],
+    [/ice cream/i, ["1 pint","1.5 quart","1 gallon"], "1.5 quart"],
+    [/formula/i, ["12.4 oz","20 oz","32 oz ready-to-feed"], "12.4 oz"],
+    [/coffee/i, ["12 oz bag","24 oz","30 oz can"], "12 oz bag"],
+  ];
+  function withSize(obj, raw) {
+    let qty = 1;
+    const m = raw.match(/^\s*(\d+)\s*(x\s*)?/i);
+    if (m) { qty = Math.max(1, parseInt(m[1], 10)); obj.item = raw.replace(m[0], "").trim() || obj.item; obj.item = obj.item.charAt(0).toUpperCase() + obj.item.slice(1); }
+    const f = SIZES.find(([re]) => re.test(raw));
+    obj.qty = qty;
+    obj.sizes = f ? f[1] : [];
+    obj.size = f ? f[2] : "";
+    return obj;
+  }
+  const I = (item, qty, sizes, size, options, option) => ({ item, qty, sizes, size, options: options || [], option: option || "", eligible: true });
+  const DISHES = [
+    [/\b(ham|cheese)?burgers?\b(?!\s*(bun|patt))/i, "Burger", [
+      I("Burger buns", 1, ["4-pack","8-pack"], "8-pack"),
+      I("Ground beef", 1, ["1 lb","2 lb","3 lb","5 lb"], "2 lb"),
+      I("Cheese", 1, ["8 oz","12 oz","16 oz"], "8 oz", ["American","Cheddar","Swiss"], "American"),
+      I("Lettuce", 1, ["1 head","Bagged (9 oz)"], "1 head"),
+      I("Tomato", 1, ["1 lb","2 lb"], "1 lb"),
+      I("Onion", 1, ["1 onion","3 lb bag"], "1 onion"),
+      I("Pickles", 1, ["16 oz jar","24 oz jar"], "16 oz jar"),
+      I("Condiment", 1, ["Regular bottle","Large bottle"], "Regular bottle", ["Ketchup","Mustard","Mayonnaise"], "Ketchup"),
+      I("Salt", 1, ["26 oz"], "26 oz"),
+      I("Black pepper", 1, ["3 oz","6 oz"], "3 oz"),
+    ]],
+    [/\btacos?\b/i, "Tacos", [
+      I("Taco shells or tortillas", 1, ["10-count","12-count","18-count"], "12-count", ["Hard shells","Flour tortillas","Corn tortillas"], "Hard shells"),
+      I("Ground beef", 1, ["1 lb","2 lb","3 lb"], "1 lb"),
+      I("Taco seasoning", 1, ["1 oz packet","Large jar"], "1 oz packet"),
+      I("Shredded cheese", 1, ["8 oz","16 oz"], "8 oz", ["Mexican blend","Cheddar"], "Mexican blend"),
+      I("Lettuce", 1, ["1 head","Bagged (9 oz)"], "1 head"),
+      I("Tomato", 1, ["1 lb","2 lb"], "1 lb"),
+      I("Salsa", 1, ["16 oz jar","24 oz jar"], "16 oz jar"),
+    ]],
+    [/\b(spaghetti|pasta)\b(?!\s*sauce)/i, "Spaghetti", [
+      I("Spaghetti", 1, ["1 lb box","2 lb box"], "1 lb box"),
+      I("Pasta sauce", 1, ["24 oz jar","45 oz jar"], "24 oz jar"),
+      I("Ground beef", 1, ["1 lb","2 lb"], "1 lb"),
+      I("Parmesan cheese", 1, ["8 oz","16 oz"], "8 oz"),
+    ]],
+    [/\bgrilled cheese\b/i, "Grilled cheese", [
+      I("Bread", 1, ["1 loaf"], "1 loaf"),
+      I("Cheese slices", 1, ["12 slices","24 slices"], "12 slices", ["American","Cheddar"], "American"),
+      I("Butter", 1, ["1 stick","1 lb (4 sticks)"], "1 lb (4 sticks)"),
+    ]],
+    [/\bpancakes?\b/i, "Pancakes", [
+      I("Pancake mix", 1, ["32 oz box","5 lb box"], "32 oz box"),
+      I("Milk", 1, ["1 quart","Half gallon","1 gallon"], "Half gallon"),
+      I("Eggs", 1, ["6 count","12 count"], "12 count"),
+      I("Syrup", 1, ["12 oz","24 oz"], "24 oz"),
+      I("Butter", 1, ["1 stick","1 lb (4 sticks)"], "1 lb (4 sticks)"),
+    ]],
+  ];
+  function dishWhy(name) { return "A hot, ready-made " + name.toLowerCase() + " isn’t covered by SNAP, but you can make it with these groceries."; }
+
+  function localClassify(text) {
+    const items = text.split(/,|\n|;|\band\b/i).map(s => s.trim()).filter(Boolean);
+    const out = { dishes: [], eligible: [], not_eligible: [], depends: [], note: "" };
+    for (const raw of items) {
+      const dm = DISHES.find(([re]) => re.test(raw));
+      if (dm) { out.dishes.push({ dish: dm[1], why: dishWhy(dm[1]), ingredients: dm[2].map(x => Object.assign({}, x)) }); continue; }
+      const item = raw.charAt(0).toUpperCase() + raw.slice(1);
+      const m = MAYBE.find(([re]) => re.test(raw));
+      if (m) { (m[1].startsWith("Live") ? out.eligible : out.depends).push(withSize({ item, reason: m[1] }, raw)); continue; }
+      const n = NO.find(([re]) => re.test(raw));
+      if (n) { out.not_eligible.push({ item, reason: n[1] }); continue; }
+      out.eligible.push(withSize({ item }, raw));
+    }
+    if (!items.length) out.note = "Tell me what you want to buy.";
+    return out;
+  }
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function clampQty(v) { v = parseInt(v, 10); return isFinite(v) ? Math.min(99, Math.max(1, v)) : 1; }
+
+  function controls(it, onChange) {
+    const wrap = el("div", "ctrls");
+    const step = el("div", "stepper");
+    const minus = el("button", null, "−"); minus.type = "button";
+    const out = el("output"); out.textContent = it.qty;
+    const plus = el("button", null, "+"); plus.type = "button";
+    const name = String(it.item || "item");
+    minus.setAttribute("aria-label", "One less " + name);
+    plus.setAttribute("aria-label", "One more " + name);
+    out.setAttribute("aria-label", "Quantity of " + name);
+    const sync = () => { out.textContent = it.qty; minus.disabled = it.qty <= 1; plus.disabled = it.qty >= 99; onChange(); };
+    minus.onclick = () => { it.qty = clampQty(it.qty - 1); sync(); };
+    plus.onclick = () => { it.qty = clampQty(it.qty + 1); sync(); };
+    minus.disabled = it.qty <= 1;
+    step.append(minus, out, plus);
+    wrap.append(step);
+
+    if (Array.isArray(it.options) && it.options.length) {
+      const osel = el("select", "size");
+      osel.setAttribute("aria-label", "Type of " + name);
+      for (const op of it.options) { const o = el("option", null, String(op)); o.value = String(op); osel.append(o); }
+      if (!it.options.includes(it.option)) it.option = it.options[0];
+      osel.value = it.option;
+      osel.onchange = () => { it.option = osel.value; onChange(); };
+      wrap.append(osel);
+    }
+    if (Array.isArray(it.sizes) && it.sizes.length) {
+      const sel = el("select", "size");
+      sel.setAttribute("aria-label", "Size of " + name);
+      for (const sz of it.sizes) { const o = el("option", null, String(sz)); o.value = String(sz); sel.append(o); }
+      if (!it.sizes.includes(it.size)) it.size = it.sizes[0];
+      sel.value = it.size;
+      sel.onchange = () => { it.size = sel.value; onChange(); };
+      wrap.append(sel);
+    }
+    return wrap;
+  }
+
+  function section(kind, title, mark, list, withControls, onChange) {
+    if (!list || !list.length) return null;
+    const s = el("div", "sec " + kind);
+    const h = el("h2"); h.append(el("span", null, title), el("span", null, String(list.length)));
+    s.append(h);
+    const ul = el("ul");
+    for (const it of list) {
+      const li = el("li");
+      const row = el("div", "row");
+      row.append(el("span", "mark", mark));
+      const nm = el("div", "name");
+      nm.append(el("b", null, String(it.item || "").trim()));
+      if (it.reason) nm.append(el("small", null, it.reason));
+      if (withControls) nm.append(controls(it, onChange));
+      row.append(nm);
+      li.append(row);
+      ul.append(li);
+    }
+    s.append(ul);
+    return s;
+  }
+
+  function normalize(list) {
+    return (Array.isArray(list) ? list : []).map(x => {
+      const it = Object.assign({}, x);
+      it.qty = clampQty(it.qty == null ? 1 : it.qty);
+      it.sizes = Array.isArray(it.sizes) ? it.sizes.map(String).filter(Boolean).slice(0, 8) : [];
+      it.size = it.size ? String(it.size) : (it.sizes[0] || "");
+      it.options = Array.isArray(it.options) ? it.options.map(String).filter(Boolean).slice(0, 8) : [];
+      it.option = it.option ? String(it.option) : (it.options[0] || "");
+      return it;
+    });
+  }
+
+  function lineFor(x) {
+    const extra = [x.option, x.size].filter(Boolean).join(", ");
+    return "• " + x.qty + " × " + x.item + (extra ? " (" + extra + ")" : "");
+  }
+
+  function renderDish(dish, usedAI) {
+    const ings = normalize(dish.ingredients).filter(x => x.item);
+    if (!ings.length) return;
+    const dishName = String(dish.dish || "This dish");
+    const c = el("div", "receipt dish");
+    const head = el("div", "head");
+    head.append(el("strong", null, "Make it at home: " + dishName));
+    head.append(el("span", null, "Core ingredients"));
+    c.append(head);
+    c.append(el("p", "why", dish.why ? String(dish.why) : dishWhy(dishName)));
+
+    const ul = el("ul");
+    const boxes = [];
+    ings.forEach((it, i) => {
+      const li = el("li");
+      const lab = el("label");
+      const cb = el("input"); cb.type = "checkbox"; cb.checked = true;
+      boxes.push(cb);
+      const txt = el("span");
+      const b = el("b", null, it.item);
+      txt.append(b);
+      if (it.options.length) txt.append(el("span", "opt", " (" + it.options.join(", ") + ")"));
+      if (it.eligible === false) txt.append(el("small", null, "Not covered by SNAP" + (it.reason ? ": " + it.reason : "")));
+      lab.append(cb, txt);
+      li.append(lab);
+      ul.append(li);
+    });
+    c.append(ul);
+    c.append(el("p", "ask", "Would you like to add these to your list? Uncheck anything you already have."));
+    const actions = el("div", "actions");
+    const yes = el("button", "primary", "Yes, add these"); yes.type = "button";
+    const no = el("button", "secondary", "No thanks"); no.type = "button";
+    actions.append(yes, no);
+    c.append(actions);
+    const finish = (msg) => { yes.disabled = true; no.disabled = true; boxes.forEach(b => b.disabled = true); c.append(el("p", "done", msg)); };
+    yes.onclick = () => {
+      const picked = ings.filter((_, i) => boxes[i].checked);
+      if (!picked.length) { c.querySelector(".ask").textContent = "Check at least one ingredient, or choose No thanks."; return; }
+      finish("Added " + picked.length + (picked.length === 1 ? " item" : " items") + " below.");
+      const eligible = picked.filter(x => x.eligible !== false);
+      const not_eligible = picked.filter(x => x.eligible === false).map(x => ({ item: x.item, reason: x.reason || "Not covered by SNAP" }));
+      renderReceipt({ eligible, not_eligible, depends: [] }, usedAI, dishName + " groceries");
+      thread.lastElementChild.scrollIntoView({ block: "start", behavior: "smooth" });
+    };
+    no.onclick = () => finish("No problem. Tell me anything else you want to buy.");
+    thread.append(c);
+  }
+
+  function renderReceipt(data, usedAI, title) {
+    const dishes = Array.isArray(data.dishes) ? data.dishes : [];
+    const hasItems = ["eligible","not_eligible","depends"].some(k => Array.isArray(data[k]) && data[k].length);
+    if (dishes.length && !hasItems) { dishes.forEach(d => renderDish(d, usedAI)); return; }
+    const r = el("div", "receipt");
+    const head = el("div", "head");
+    head.append(el("strong", null, title || "SNAP check · Connecticut"));
+    const now = new Date();
+    head.append(el("span", null, now.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })));
+    r.append(head);
+
+    const e = normalize(data.eligible);
+    const n = Array.isArray(data.not_eligible) ? data.not_eligible : [];
+    const d = normalize(data.depends);
+    const total = el("p", "total");
+    const updateTotal = () => {
+      const c = e.reduce((a, x) => a + x.qty, 0);
+      total.textContent = c + (c === 1 ? " SNAP item" : " SNAP items") + " in your list";
+    };
+
+    if (!e.length && !n.length && !d.length) {
+      r.append(el("p", null, data.note || "I didn’t find any items. List what you want to buy, separated by commas."));
+      thread.append(r); return;
+    }
+    [section("yes", "SNAP covers these", "✓", e, true, updateTotal),
+     section("maybe", "Check before you buy", "?", d, true, updateTotal),
+     section("no", "SNAP won’t cover these", "✕", n, false)].forEach(x => x && r.append(x));
+    if (e.length) { updateTotal(); r.append(total); }
+
+    if (data.note) r.append(el("p", "src", data.note));
+
+    if (e.length) {
+      const foot = el("div", "foot");
+      const btn = el("button", null, "Copy my SNAP list");
+      btn.type = "button";
+      const msg = el("span", "copied");
+      btn.onclick = async () => {
+        let txt = "SNAP-eligible items:\n" + e.map(lineFor).join("\n");
+        if (d.length) txt += "\n\nCheck before buying:\n" + d.map(lineFor).join("\n");
+        try { await navigator.clipboard.writeText(txt); msg.textContent = "Copied"; }
+        catch { msg.textContent = "Couldn’t copy. Select the list and copy it by hand."; }
+      };
+      foot.append(btn, msg);
+      r.append(foot);
+    }
+    if (!usedAI) r.append(el("p", "src", "Quick check by keyword matching. Double-check anything unusual."));
+    thread.append(r);
+    dishes.forEach(d => renderDish(d, usedAI));
+  }
+
+  async function check(text) {
+    thread.append(el("div", "you", text));
+    const status = el("div", "status", "Checking your list…");
+    thread.append(status);
+    status.scrollIntoView({ block: "end", behavior: "smooth" });
+    send.disabled = true;
+
+    let data = null, usedAI = false;
+    try {
+      const res = await fetch("/api/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.slice(0, 4000) })
+      });
+      const body = await res.json().catch(() => null);
+      if (res.ok && body && typeof body === "object" && !body.error) {
+        data = body; usedAI = true;
+      } else {
+        const msgs = {
+          no_key: "The AI isn’t set up yet: add your API key to config.txt and restart the server. Using a quick keyword check for now.",
+          bad_key: "The API key was rejected. Check the key in config.txt. Using a quick keyword check for now.",
+          rate_limited: "Too many checks right now. Using a quick keyword check instead.",
+          no_credit: "Your API account is out of credit. Add credit at console.anthropic.com. Using a quick keyword check for now."
+        };
+        const code = body && body.error;
+        thread.insertBefore(el("div", "error", msgs[code] || "The AI couldn’t answer this time. Using a quick keyword check instead."), status);
+      }
+    } catch (e) {
+      thread.insertBefore(el("div", "error", "Can’t reach the server. Make sure it’s running (see README). Using a quick keyword check for now."), status);
+    }
+    if (!data || typeof data !== "object") data = localClassify(text);
+    status.remove();
+    const before = thread.children.length + 1;
+    renderReceipt(data, usedAI);
+    send.disabled = false;
+    const first = thread.children[before - 1] || thread.lastElementChild;
+    if (first) first.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const t = box.value.trim();
+    if (!t || send.disabled) return;
+    box.value = ""; box.style.height = "";
+    check(t);
+  });
+  box.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); form.requestSubmit(); }
+  });
+  box.addEventListener("input", () => { box.style.height = "auto"; box.style.height = Math.min(box.scrollHeight, 144) + "px"; });
+  document.querySelectorAll(".examples button").forEach(b => b.addEventListener("click", () => {
+    if (send.disabled) return;
+    check(b.dataset.ex);
+  }));
+})();
+</script>
+</body>
+</html>
