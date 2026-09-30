@@ -392,7 +392,6 @@
     }
     const lines = cartLines();
     list = [];
-    resetShelves();
     box.placeholder = "Type what you want…";
     // The confirmed list is final: lock the earlier receipts so they can't drift from the cart.
     thread.querySelectorAll(".receipt:not(.cart) button, .receipt:not(.cart) select, .receipt:not(.cart) input")
@@ -400,7 +399,7 @@
 
     const c = el("div", "receipt cart");
     const head = el("div", "head");
-    head.append(el("strong", null, "Your cart"));
+    head.append(el("strong", null, "Added to your cart"));
     head.append(el("span", null, new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })));
     c.append(head);
     const ul = el("ul", "cart-lines");
@@ -469,209 +468,25 @@
       c.insertBefore(el("p", "error", problem || "No price estimates were available for these items."), total);
     }
 
-    // Keep the cart in this browser, then show the order summary to confirm.
-    const cart = { at: Date.now(), store: store && store.name ? store : null, items: lines, total: priced ? Math.round(sum * 100) / 100 : null };
-    try { localStorage.setItem("ctfa_cart", JSON.stringify(cart)); } catch {}
+    // Put these items in the shared cart (with anything added from the shelves), then open checkout.
+    if (window.Doorstep) Doorstep.addLines(lines);
     const next = el("div", "next");
-    next.append(el("p", "ask", "Your cart is ready."));
+    next.append(el("p", "ask", "Added to your cart."));
     next.append(el("p", "hint", "Check the summary, choose a pickup time, and confirm your order."));
     const actions = el("div", "actions");
-    const review = el("button", "primary", "Review and confirm order"); review.type = "button";
-    review.onclick = () => openOrder(cart);
+    const review = el("button", "primary", "Checkout"); review.type = "button";
+    review.onclick = () => window.Doorstep && Doorstep.openCheckout();
     actions.append(review);
     next.append(actions);
     thread.append(next);
-    openOrder(cart);
+    if (window.Doorstep) Doorstep.openCheckout();
   }
 
-  // ---- Order summary popup: items, store, pickup time, confirm ----
-  const dialog = document.getElementById("order-dialog");
-
-  // Pickup times: every 30 minutes from about an hour from now until 9 PM, then tomorrow from 9 AM.
-  function pickupSlots() {
-    const slots = [], t = new Date();
-    t.setSeconds(0, 0);
-    t.setMinutes(t.getMinutes() + 60);
-    t.setMinutes(t.getMinutes() < 30 ? 30 : 60);
-    const endToday = new Date(); endToday.setHours(21, 0, 0, 0);
-    for (; t <= endToday && slots.length < 12; t.setMinutes(t.getMinutes() + 30)) slots.push(new Date(t));
-    const tm = new Date(); tm.setDate(tm.getDate() + 1); tm.setHours(9, 0, 0, 0);
-    for (let i = 0; i < 6; i++, tm.setMinutes(tm.getMinutes() + 60)) slots.push(new Date(tm));
-    return slots;
-  }
-  function slotLabel(d) {
-    const today = new Date().toDateString() === d.toDateString();
-    return (today ? "Today" : "Tomorrow") + ", " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-  }
-
-  function openOrder(cart) {
-    if (!dialog) return;
-    dialog.textContent = "";
-    const panel = el("div", "od");
-    const head = el("div", "od-head");
-    const title = el("h2", null, "Confirm your order"); title.id = "order-title";
-    const x = el("button", "od-close", "×"); x.type = "button"; x.setAttribute("aria-label", "Close");
-    x.onclick = () => dialog.close();
-    head.append(title, x);
-    panel.append(head);
-
-    // Items
-    panel.append(el("h3", null, "Items"));
-    const ul = el("ul", "od-items");
-    cart.items.forEach(it => {
-      const li = el("li");
-      const name = el("div");
-      name.append(el("b", null, it.qty + " × " + it.item));
-      const detail = [it.option, it.size].filter(Boolean).join(", ");
-      if (detail) name.append(el("small", null, detail));
-      li.append(name, el("span", null, it.price ? money(it.price * it.qty) : "—"));
-      ul.append(li);
-    });
-    panel.append(ul);
-    panel.append(el("p", "od-total", cart.total != null ? "Estimated total: " + money(cart.total) : "Estimated total: not available"));
-
-    // Store
-    panel.append(el("h3", null, "Pickup location"));
-    const where = el("div", "od-store");
-    if (cart.store) {
-      where.append(el("b", null, cart.store.name));
-      if (cart.store.address) where.append(el("small", null, cart.store.address));
-    } else {
-      where.append(el("b", null, "No store chosen yet"));
-      const pick = el("a", null, "Pick a store on the map"); pick.href = "map.html";
-      where.append(pick);
-    }
-    panel.append(where);
-
-    // Pickup time
-    const tl = el("label", "od-label", "Pickup time"); tl.htmlFor = "od-time";
-    panel.append(tl);
-    const sel = el("select", "size od-time"); sel.id = "od-time";
-    pickupSlots().forEach(d => { const o = el("option", null, slotLabel(d)); o.value = d.toISOString(); sel.append(o); });
-    panel.append(sel);
-    panel.append(el("p", "od-note", "Pay at pickup with your EBT card. Items that need a label check are marked in your cart."));
-
-    const actions = el("div", "od-actions");
-    const ok = el("button", "btn btn-orange", "Confirm order"); ok.type = "button";
-    const back = el("button", "btn btn-outline", "Keep shopping"); back.type = "button";
-    back.onclick = () => dialog.close();
-    ok.disabled = !cart.store;
-    ok.onclick = () => placeOrder(cart, new Date(sel.value));
-    actions.append(ok, back);
-    panel.append(actions);
-
-    dialog.append(panel);
-    if (!dialog.open) dialog.showModal();
-  }
-
-  function placeOrder(cart, when) {
-    const order = { id: "DS-" + Math.floor(100000 + Math.random() * 900000), placedAt: Date.now(),
-                    pickupAt: when.toISOString(), store: cart.store, items: cart.items, total: cart.total };
-    try {
-      const orders = JSON.parse(localStorage.getItem("ctfa_orders") || "[]");
-      orders.push(order);
-      localStorage.setItem("ctfa_orders", JSON.stringify(orders.slice(-20)));
-      localStorage.removeItem("ctfa_cart");
-    } catch {}
-    dialog.textContent = "";
-    const panel = el("div", "od od-done");
-    panel.append(el("div", "od-check", "✓"));
-    const t = el("h2", null, "Order confirmed"); t.id = "order-title";
-    panel.append(t);
-    panel.append(el("p", null, "Order number " + order.id));
-    panel.append(el("p", null, "Pick up at " + cart.store.name + ", " + slotLabel(when) + "."));
-    panel.append(el("p", "od-note", "Pay at pickup with your EBT card."));
-    const done = el("button", "btn btn-navy", "Done"); done.type = "button";
-    done.onclick = () => dialog.close();
-    panel.append(done);
-    dialog.append(panel);
+  document.addEventListener("ctfa-order", (e) => {
+    const o = e.detail;
     thread.querySelectorAll(".next").forEach(n => n.remove());
-    thread.append(el("p", "bot", "Your order " + order.id + " is confirmed for pickup at " + cart.store.name + ", " + slotLabel(when) + ". Want anything else? Just type it."));
-  }
-  if (dialog) dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
-
-  // ---- Store shelves: simple categories of SNAP items that go into the same list as the chat ----
-  const SHELVES = [
-    ["Produce", [["🍌","Bananas","1 lb",0.69],["🍎","Apples","3 lb bag",4.99],["🥕","Carrots","2 lb bag",2.49],["🥬","Lettuce","1 head",1.99],["🍅","Tomatoes","1 lb",2.49],["🧅","Onions","3 lb bag",3.49]]],
-    ["Dairy & eggs", [["🥛","Milk","1 gallon",4.29],["🥚","Eggs","12 count",3.49],["🧀","Cheddar cheese","8 oz",3.29],["🧈","Butter","1 lb (4 sticks)",4.99],["🍶","Yogurt","32 oz",3.99]]],
-    ["Meat & fish", [["🍗","Chicken breast","1 lb",4.49],["🥩","Ground beef","1 lb",5.99],["🐟","Canned tuna","5 oz can",1.49],["🥓","Bacon","12 oz",5.99],["🌭","Hot dogs","8-pack",3.99]]],
-    ["Bakery", [["🍞","Bread","1 loaf",2.99],["🥯","Bagels","6-pack",3.99],["🫓","Tortillas","10-count",2.99],["🍔","Burger buns","8-pack",2.99]]],
-    ["Pantry", [["🍚","Rice","2 lb bag",2.49],["🍝","Spaghetti","1 lb box",1.49],["🥫","Pasta sauce","24 oz jar",2.99],["🫘","Black beans","15 oz can",1.19],["🥣","Cereal","18 oz box",3.99],["🥜","Peanut butter","16 oz jar",3.29]]],
-    ["Snacks & drinks", [["🧃","Orange juice","52 oz",3.99],["💧","Bottled water","24-pack",4.99],["🥤","Soda","2 liter",2.29],["🍪","Cookies","13 oz",3.99],["🥔","Chips","8 oz bag",3.99]]],
-    ["Frozen", [["🥦","Frozen vegetables","12 oz bag",1.99],["🍕","Frozen pizza","1 pizza",5.99],["🍨","Ice cream","1.5 qt",4.99],["🍟","Frozen fries","32 oz bag",3.49]]],
-  ];
-  const tabs = document.getElementById("shelf-tabs");
-  const grid = document.getElementById("shelf-grid");
-  const bar = document.getElementById("shelf-bar");
-  const barCount = document.getElementById("shelf-count");
-  const shelfEntries = new Map(); // item name -> its entry in the list
-  let shelfIndex = 0;
-
-  function renderShelf() {
-    if (!grid) return;
-    grid.textContent = "";
-    SHELVES[shelfIndex][1].forEach(([icon, name, size, price]) => {
-      const card = el("div", "shelf-item");
-      card.append(el("span", "si-icon", icon));
-      const info = el("div", "si-info");
-      info.append(el("b", null, name), el("small", null, size + " · " + money(price)));
-      card.append(info);
-      const entry = shelfEntries.get(name);
-      if (entry) {
-        const step = el("div", "stepper");
-        const minus = el("button", null, "−"); minus.type = "button"; minus.setAttribute("aria-label", "One less " + name);
-        const out = el("output", null, String(entry.it.qty)); out.setAttribute("aria-label", "Quantity of " + name);
-        const plus = el("button", null, "+"); plus.type = "button"; plus.setAttribute("aria-label", "One more " + name);
-        plus.disabled = entry.it.qty >= 99;
-        minus.onclick = () => changeShelf(name, -1);
-        plus.onclick = () => changeShelf(name, +1);
-        step.append(minus, out, plus);
-        card.append(step);
-      } else {
-        const add = el("button", "si-add", "Add"); add.type = "button"; add.setAttribute("aria-label", "Add " + name);
-        add.onclick = () => {
-          const entry = { it: { item: name, qty: 1, sizes: [size], size, options: [], option: "", price, eligible: true }, check: false };
-          shelfEntries.set(name, entry); list.push(entry); shelfChanged();
-        };
-        card.append(add);
-      }
-      grid.append(card);
-    });
-  }
-  function changeShelf(name, d) {
-    const entry = shelfEntries.get(name);
-    if (!entry) return;
-    entry.it.qty = Math.min(99, entry.it.qty + d);
-    if (entry.it.qty < 1) { shelfEntries.delete(name); list = list.filter(x => x !== entry); }
-    shelfChanged();
-  }
-  function shelfChanged() {
-    renderShelf();
-    const n = itemCount();
-    if (bar) { bar.hidden = !n; barCount.textContent = n + (n === 1 ? " item" : " items") + " in your list"; }
-    // Keep the chat's "add more or confirm?" card in step with the list.
-    if (list.length) askNext(); else thread.querySelectorAll(".next").forEach(x => x.remove());
-  }
-  function resetShelves() {
-    shelfEntries.clear();
-    if (bar) bar.hidden = true;
-    renderShelf();
-  }
-  if (tabs) {
-    SHELVES.forEach(([label], i) => {
-      const t = el("button", "shelf-tab", label); t.type = "button";
-      t.setAttribute("role", "tab");
-      t.setAttribute("aria-selected", i === 0 ? "true" : "false");
-      t.onclick = () => {
-        shelfIndex = i;
-        tabs.querySelectorAll(".shelf-tab").forEach((b, j) => b.setAttribute("aria-selected", j === i ? "true" : "false"));
-        renderShelf();
-      };
-      tabs.append(t);
-    });
-    renderShelf();
-    document.getElementById("shelf-confirm").onclick = () => confirmList("Confirm order");
-  }
+    thread.append(el("p", "bot", "Your order " + o.id + " is confirmed" + (o.store ? " for pickup at " + o.store.name : "") + ". Want anything else? Just type it."));
+  });
 
   form.addEventListener("submit", (ev) => {
     ev.preventDefault();

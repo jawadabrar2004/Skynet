@@ -156,8 +156,15 @@
     };
   }
 
+  // Where to go after signing in: a page in this folder passed as ?next= (from checkout), else the map.
+  var NEXT = (function () {
+    var n = new URLSearchParams(location.search).get('next') || '';
+    return /^[a-z0-9-]+\.html(\?checkout=1)?$/i.test(n) ? n : '';
+  })();
+  function nextPage() { return NEXT || 'map.html'; }
+
   function redirectIfSignedIn() {
-    api('/api/auth/me').then(function (d) { if (d.user) window.location.replace('map.html'); });
+    api('/api/auth/me').then(function (d) { if (d.user) window.location.replace(nextPage()); });
   }
 
   /* ---------- Sign up ---------- */
@@ -173,7 +180,7 @@
     if (fromLogin.length === 10) {
       phone.value = fmtPhone(fromLogin);
       var note = $('#new-number'); if (note) note.hidden = false;
-      history.replaceState(null, '', location.pathname);
+      history.replaceState(null, '', location.pathname + (NEXT ? '?next=' + encodeURIComponent(NEXT) : ''));
     }
     ebt.addEventListener('input', function () { ebt.value = fmtEbt(ebt.value); });
     $all('input[name="disabled"]').forEach(function (r) {
@@ -219,6 +226,7 @@
         $('#delivery-note').textContent = user.deliveryEligible
           ? 'You can request delivery when you place an order.'
           : 'You can order for pickup. Delivery is available for seniors (60+) and people with a disability.';
+        if (NEXT) { var go = $('#success-panel .btn'); go.href = NEXT; go.textContent = 'Back to your order'; }
         $('#success-panel h2').focus();
       }
     });
@@ -260,7 +268,7 @@
       start: start,
       back: function () { phone.focus(); },
       verify: function (code) { return api('/api/auth/login/verify', { phone: p, code: code }); },
-      done: function () { window.location.href = 'map.html'; }
+      done: function () { window.location.href = nextPage(); }
     });
 
     form.addEventListener('submit', function (e) {
@@ -272,16 +280,19 @@
         busy(btn, false);
         if (d.status === 200) { setErr('phone', ''); showVerify(d); return; }
         // No account for this number: go straight to sign up, with the number filled in.
-        if (d.status === 404) { window.location.href = 'signup.html?phone=' + p; return; }
+        if (d.status === 404) { window.location.href = 'signup.html?phone=' + p + (NEXT ? '&next=' + encodeURIComponent(NEXT) : ''); return; }
         setErr('phone', (d.errors && d.errors.phone) || message(d)); phone.focus();
       });
     });
 
     // Continue as guest: browse stores and shop without an account.
     var guest = $('#guest-btn');
-    if (guest) guest.addEventListener('click', function () {
-      try { localStorage.setItem('ctfa_guest', '1'); } catch (e) {}
-    });
+    if (guest) {
+      if (NEXT) guest.href = NEXT;
+      guest.addEventListener('click', function () {
+        try { localStorage.setItem('ctfa_guest', '1'); } catch (e) {}
+      });
+    }
   }
 
   if ($('#signup-form')) initSignup();

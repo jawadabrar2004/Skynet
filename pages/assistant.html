@@ -24,7 +24,6 @@
       <nav class="main-nav" aria-label="Main">
         <ul>
           <li><a href="../index.html">Home</a></li>
-          <li><a href="../index.html#how">How it works</a></li>
           <li><a href="../index.html#travel">Ways to travel</a></li>
           <li><a href="../index.html#help">Help</a></li>
         </ul>
@@ -54,20 +53,7 @@
     </form>
   </div>
 
-  <section class="shelves" id="shelves" aria-labelledby="shelves-title">
-    <div class="shelves-head">
-      <h2 id="shelves-title">Or shop by category</h2>
-      <p>Everything here can be bought with SNAP. Prices are typical estimates.</p>
-    </div>
-    <div class="shelf-tabs" id="shelf-tabs" role="tablist" aria-label="Categories"></div>
-    <div class="shelf-grid" id="shelf-grid" role="tabpanel"></div>
-    <div class="shelf-bar" id="shelf-bar" hidden>
-      <span id="shelf-count">0 items in your list</span>
-      <button class="btn btn-orange" id="shelf-confirm" type="button">Confirm order</button>
-    </div>
-  </section>
-
-  <dialog class="order-dialog" id="order-dialog" aria-labelledby="order-title"></dialog>
+  <section class="shelves" id="shelves"></section>
 
   <div class="notice">
     <p>Based on federal USDA SNAP rules as of September 2026. Connecticut has no extra soda or candy ban. Rules can change, so check <a href="https://portal.ct.gov/dss" target="_blank" rel="noopener">CT DSS</a> for official updates. Want to know where to shop? <a href="map.html">Find SNAP/EBT stores near you</a>.</p>
@@ -77,11 +63,12 @@
   <div class="wrap footer-grid">
     <div><h4>Doorstep</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
     <div><h4>Data we use</h4><ul><li>Foodshare service areas</li><li>USDA Food Access Research Atlas</li><li>CTtransit GTFS routes</li><li>Public pantry directories</li></ul></div>
-    <div><h4>Links</h4><ul><li><a href="../pages/signup.html">Sign up</a></li><li><a href="../pages/login.html">Sign in</a></li><li><a href="../index.html#how">How it works</a></li></ul></div>
+    <div><h4>Links</h4><ul><li><a href="../pages/signup.html">Sign up</a></li><li><a href="../pages/login.html">Sign in</a></li></ul></div>
     <p class="footer-fine">Prototype for demonstration only. Store hours and stock may change; confirm before you travel.</p>
   </div>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../js/main.js"></script>
+<script src="../js/order.js"></script>
 <script src="../js/assistant.js"></script>
 </body></html>

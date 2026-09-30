@@ -24,7 +24,6 @@
       <nav class="main-nav" aria-label="Main">
         <ul>
           <li><a href="../index.html">Home</a></li>
-          <li><a href="../index.html#how">How it works</a></li>
           <li><a href="../index.html#travel">Ways to travel</a></li>
           <li><a href="../index.html#help">Help</a></li>
         </ul>
@@ -44,22 +43,25 @@
 
   <div class="composer">
     <form id="form" action="assistant.html" method="get">
-      <textarea id="box" name="q" rows="1" maxlength="4000" required placeholder="For example: milk, eggs, and tacos for dinner"></textarea>
+      <textarea id="box" name="q" rows="1" maxlength="4000" required placeholder="Milk, eggs, tacos for dinner…"></textarea>
       <button class="btn btn-navy" type="submit"><span class="send-label">Ask</span> <span aria-hidden="true">→</span></button>
     </form>
   </div>
 
   <p class="shop-change"><a href="map.html">Pick a different store</a></p>
+
+  <section class="shelves" id="shelves"></section>
 </main>
 <footer class="site-footer">
   <div class="wrap footer-grid">
     <div><h4>Doorstep</h4><p>A hackathon prototype for finding realistic food resources in Connecticut, by car, bus, or on foot.</p></div>
     <div><h4>Data we use</h4><ul><li>Foodshare service areas</li><li>USDA Food Access Research Atlas</li><li>CTtransit GTFS routes</li><li>Public pantry directories</li></ul></div>
-    <div><h4>Links</h4><ul><li><a href="../pages/signup.html">Sign up</a></li><li><a href="../pages/login.html">Sign in</a></li><li><a href="../index.html#how">How it works</a></li></ul></div>
+    <div><h4>Links</h4><ul><li><a href="../pages/signup.html">Sign up</a></li><li><a href="../pages/login.html">Sign in</a></li></ul></div>
     <p class="footer-fine">Prototype for demonstration only. Store hours and stock may change; confirm before you travel.</p>
   </div>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../js/main.js"></script>
+<script src="../js/order.js"></script>
 <script src="../js/shop.js"></script>
 </body></html>

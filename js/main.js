@@ -27,6 +27,8 @@
   // Signed-in header. The server keeps the session in a secure cookie; /api/auth/me says who is signed in.
   var links = document.getElementById('auth-links');
   var inPages = location.pathname.indexOf('/pages/') !== -1;
+  // Cart icon at the top right, for everyone (guests too).
+  initCart();
   if (!links || location.protocol === 'file:') return;
 
   fetch('/api/auth/me', { credentials: 'same-origin' })
@@ -48,11 +50,10 @@
     });
     links.appendChild(hi); links.appendChild(mapLink); links.appendChild(out);
     document.body.classList.add('signed-in');
-    initCart();
   }
 
-  // Cart (signed-in only): an icon at the top right opens a side panel listing the cart
-  // saved by the SNAP assistant (localStorage "ctfa_cart"), where amounts can be changed or items removed.
+  // Cart: an icon at the top right opens a side panel listing the cart (localStorage "ctfa_cart",
+  // filled from the store shelves and the SNAP assistant), where amounts can be changed or items removed.
   function initCart() {
     var row = document.querySelector('.header-row');
     if (!row) return;
@@ -72,6 +73,7 @@
       c.total = priced ? Math.round(sum * 100) / 100 : null;
       c.at = Date.now();
       try { localStorage.setItem(CART, JSON.stringify(c)); } catch (e) {}
+      document.dispatchEvent(new Event('ctfa-cart'));
     }
     function money(v) { return '$' + v.toFixed(2); }
     function make(tag, cls, text) {
@@ -120,10 +122,10 @@
       btn.setAttribute('aria-label', 'Cart, ' + count + (count === 1 ? ' item' : ' items'));
 
       body.textContent = ''; foot.textContent = '';
-      var more = make('a', 'btn btn-outline btn-sm', c.items.length ? 'Add more with the assistant' : 'Ask the SNAP assistant');
-      more.href = inPages ? 'assistant.html' : 'pages/assistant.html';
+      var more = make('a', 'btn btn-outline btn-sm', c.items.length ? 'Add more items' : 'Start shopping');
+      more.href = inPages ? 'shop.html' : 'pages/shop.html';
       if (!c.items.length) {
-        body.appendChild(make('p', 'cart-empty', 'Your cart is empty. Tell the SNAP assistant what you want to eat or buy.'));
+        body.appendChild(make('p', 'cart-empty', 'Your cart is empty. Add items from the store, or tell the SNAP assistant what you want to eat or buy.'));
         foot.appendChild(more);
         return;
       }
@@ -182,6 +184,13 @@
       foot.appendChild(total);
       if (missing && sum) foot.appendChild(make('p', 'cart-note', missing + (missing === 1 ? ' item has' : ' items have') + ' no price estimate.'));
       foot.appendChild(make('p', 'cart-note', 'Estimates only. Actual prices vary by store, brand and sales.'));
+      // Checkout opens the order popup on pages that have it (js/order.js), otherwise the shop page does.
+      var checkout = make('button', 'btn btn-orange', 'Checkout'); checkout.type = 'button';
+      checkout.onclick = function () {
+        if (window.Doorstep) { shut(); window.Doorstep.openCheckout(); }
+        else window.location.href = (inPages ? 'shop.html' : 'pages/shop.html') + '?checkout=1';
+      };
+      foot.appendChild(checkout);
       foot.appendChild(more);
     }
 
@@ -216,6 +225,7 @@
     });
     // Another tab (or the assistant) changed the cart
     window.addEventListener('storage', function (e) { if (e.key === CART) render(); });
+    document.addEventListener('ctfa-cart', render);
     render();
   }
 })();
