@@ -14,7 +14,8 @@ and AI tells you what Connecticut SNAP covers, with quantity and size controls.
 ## Setup
 
 1. Unzip this folder anywhere on your computer.
-2. Open **config.txt** (Notepad on Windows, TextEdit on Mac).
+2. Run the app once (see below), or copy **config.example.txt** to a new file named **config.txt**.
+   Open **config.txt** (Notepad on Windows, TextEdit on Mac).
 3. Paste your key after `ANTHROPIC_API_KEY=`, like this:
 
    ```
@@ -35,9 +36,16 @@ Then open **http://localhost:3000** in your browser. Keep the black window open 
 You'll know the AI is working when the receipts **don't** show the line
 "Quick check by keyword matching." If something is wrong, the page shows a red message saying what to fix.
 
-## Keep your key safe
+## Keep your key safe (and working)
 
-- Never put your key inside `index.html`, and don't share your `config.txt` once your key is in it.
+If your key ever appears in a public GitHub repo, GitHub's secret scanning finds it and
+Anthropic disables it automatically, usually within minutes. To stop that from happening:
+
+- Your key goes **only** in `config.txt`. The repo has `config.example.txt` instead, a blank template.
+- `config.txt` is listed in `.gitignore`, so `git add` / `git push` and GitHub Desktop skip it.
+- **If you upload with GitHub's "Add files via upload" page, `.gitignore` does NOT apply.**
+  Never drag `config.txt` (or the whole folder) onto that page. Upload the other files one by one.
+- Never put your key inside `index.html` or `server.js`.
 - The key stays on the server (`server.js`); the website never sees it.
 - `MAX_CHECKS_PER_MINUTE` in `config.txt` limits how many checks each visitor can run, to protect your bill.
 
@@ -56,5 +64,7 @@ If Connecticut changes its SNAP rules (for example, bans soda or candy), edit th
 
 - `server.js` – the small server that talks to Claude (no installs needed)
 - `public/index.html` – the website
-- `config.txt` – your settings (API key goes here)
+- `config.example.txt` – blank settings template (safe to share)
+- `config.txt` – your real settings with your API key (created on first run, never uploaded)
+- `.gitignore` – keeps `config.txt` and `.env` out of git
 - `start-windows.bat`, `start-mac.command` – double-click launchers
